@@ -89,8 +89,8 @@ class Prefetcher:
                         b[idx] = int(idx*math.ceil(o/device_num))
                         e[idx] = int(min((idx+1)*math.ceil(o/device_num), o)-1)
                     # print(idx, b[idx], e[idx])
-                    b[idx] = int(max(b[idx]*s-math.ceil(p/2), 0))
-                    e[idx] = int(min(max(e[idx]*s-math.ceil(p/2)+fs-1,0), i-1))
+                    b[idx] = int(max(b[idx]*s-p, 0))
+                    e[idx] = int(min(max(e[idx]*s-p+fs-1,0), i-1))
                 # if idx == 0:
                 #     print(b[idx], e[idx])
                 
