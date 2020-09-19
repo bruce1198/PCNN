@@ -18,7 +18,7 @@ PCNN
 │ ...
 │ README.md
 ```
-3. run `slice.py` to get the basic model in
+3. run `alex.py` to get the basic model in
 ```
 PCNN
 └─── models
@@ -31,4 +31,4 @@ PCNN
 - AlexNet -> data/prefetch1.json
 - VGG16 &nbsp;&nbsp;-> data/prefetch2.json
 - VGG19 &nbsp;&nbsp;-> data/prefetch3.json
-5. load the weights from model you have created and build the sliced model in AlexNet.py
+5. load the weights from model you have created and build the sliced model in `slice.py`
