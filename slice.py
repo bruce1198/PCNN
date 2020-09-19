@@ -33,9 +33,9 @@ class Net(nn.Module):
 
 
 net = Net()
-net.load_state_dict(torch.load('./model'))
-print(net.conv1.weight)
-# torch.save(net.state_dict(), './model')
+net.load_state_dict(torch.load('models/model'))
+print(net.conv1.weight.shape)
+# torch.save(net.state_dict(), 'models/model')
 x = torch.ones(1, 3, 224, 224)
 
 y = net(x)
