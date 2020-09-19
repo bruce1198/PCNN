@@ -1,5 +1,4 @@
-*.xls
-*.json
+data/
 .DS_Store
 .vscode
 __pycache__

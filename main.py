@@ -910,7 +910,7 @@ del data
 
 
 for model in range(0, model_length):
-    filename = 'Model_'+str(model)+'_cost2.xls'
+    filename = 'data/Model_'+str(model)+'_cost2.xls'
     book = xlwt.Workbook()
     for device in range(1, total_device_num+1):
         sheet1 = book.add_sheet('Device_num_'+str(device))
@@ -942,7 +942,7 @@ device_slice = [[[[] for m in range(maximum_row_num+1)]
 prefetchers = []
 # MLS_DP
 for model in range(model_length):
-    filename = 'Second_'+str(model)+'_cost2.xls'
+    filename = 'data/Second_'+str(model)+'_cost2.xls'
     book = xlwt.Workbook()
     sheet1 = book.add_sheet('second_dynamic')
     prefetcher = Prefetcher(str(model))
@@ -1051,11 +1051,11 @@ for model in range(model_length):
 
 for idx, prefetcher in enumerate(prefetchers):
     prefetcher.prefetch()
-    with open('prefetch'+str(idx)+'.json', 'w') as f:
+    with open('data/prefetch'+str(idx)+'.json', 'w') as f:
         f.write(prefetcher.jsonify())
 
 """execel for python plotlib"""
-filename = 'Plot.xls'
+filename = 'data/Plot.xls'
 book = xlwt.Workbook()
 for model in range(model_length):
     sheet1 = book.add_sheet(model_name[model])
@@ -1093,7 +1093,7 @@ book.save(filename)
 
 
 """execel for python plotlib"""
-filename = 'time.xls'
+filename = 'data/time.xls'
 book = xlwt.Workbook()
 for model in range(model_length):
     sheet1 = book.add_sheet(model_name[model])
