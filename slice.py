@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from fl import Layer, FCBlock
 
 class Net(nn.Module):
     def __init__(self):
@@ -80,6 +81,39 @@ y[:, :, y1.shape[2]:y1.shape[2]+y1.shape[2], :] = y2
 
 # block2
 
+# block 3
+
+# block 4
+w = net.fc1.weight.data.numpy().transpose()
+
+fblk = FCBlock('normal', 0, 2)
+fblk.append_layer(Layer(9216, 4096, w))
+y_partial0 = fblk.process(y1)
+
+fblk = FCBlock('normal', 1, 2)
+fblk.append_layer(Layer(9216, 4096, w))
+y_partial1 = fblk.process(y2)
+
+block4_output = y_partial0 + y_partial1
+
+print(block4_output.shape)
+
+# block 5
+w1 = net.fc2.weight.data.numpy().transpose()
+w2 = net.fc3.weight.data.numpy().transpose()
+
+
+fblk = FCBlock('hybrid', 0, 2)
+fblk.append_layer(Layer(4096, 4096, w1))
+fblk.append_layer(Layer(4096, 1000, w2))
+y_partial0 = fblk.process(block4_output)
+
+fblk = FCBlock('hybrid', 1, 2)
+fblk.append_layer(Layer(4096, 4096, w1))
+fblk.append_layer(Layer(4096, 1000, w2))
+y_partial1 = fblk.process(block4_output)
+
+block5_output = y_partial0 + y_partial1
 
 import xlwt
 import numpy as np

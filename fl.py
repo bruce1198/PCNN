@@ -21,10 +21,11 @@ class Layer:
         
 
 class FCBlock:
-    def __init__(self, mode, idx):
+    def __init__(self, mode, idx, total_device_num):
         self.mode = mode
         self.layers = []
         self.idx = idx
+        self.device_num = total_device_num
 
     # total device number
     def set_device_num(self, num):
