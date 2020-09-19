@@ -73,7 +73,7 @@ result_time.fill(0)
 transmission_time.fill(0)
 computation_time.fill(0)
 
-print (layer_type[1])
+# print (layer_type[1])
 
 
 def cal_FLOPs(output_height, output_width, layer, layer_type, model_type):
@@ -1048,7 +1048,11 @@ for model in range(model_length):
             second_trans_time[model][device] = tmp_second_trans_time[model][device][layer]
     prefetchers.append(prefetcher)
     book.save(filename)
-prefetchers[1].prefetch()
+
+for idx, prefetcher in enumerate(prefetchers):
+    prefetcher.prefetch()
+    with open('prefetch'+str(idx)+'.json', 'w') as f:
+        f.write(prefetcher.jsonify())
 
 """execel for python plotlib"""
 filename = 'Plot.xls'

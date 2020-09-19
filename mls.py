@@ -1,5 +1,6 @@
 import math
 from config import *
+import json
 
 class Prefetcher:
 
@@ -7,23 +8,33 @@ class Prefetcher:
         self.name = name
         self.slicing_blocks = [[] for i in range(total_device_num)]
         self.total_time = [0 for i in range(total_device_num)]
+        self.json = []
+
     def set_stride(self, stride):
         self.stride = stride
+
     def set_filter(self, filter_size):
         self.filter_size = filter_size
+
     def set_padding(self, padding):
         self.padding = padding
+
     def set_input(self, input_size):
         self.input_size = input_size
+
     def set_output(self, output_size):
         self.output_size = output_size
+
     def set_channel(self, input_channel):
         self.input_channel = input_channel
+
     def set_layer_type(self, layer_type):
         self.layer_type = layer_type
+
     def append_slicing_blocks(self, blocks, device_num, total_time):
         self.slicing_blocks[device_num] = blocks
         self.total_time[device_num] = total_time
+
     def get_fastest_slicing_blocks(self):
         min = self.total_time[0]
         idx = 0
@@ -32,14 +43,18 @@ class Prefetcher:
                 min = self.total_time[i]
                 idx = i
         return idx
+
     def prefetch(self):
         idx = self.get_fastest_slicing_blocks()
         blocks = self.slicing_blocks[idx]
+        self.json = [{} for i in range(idx+1)]
         for blk in blocks:
-            print('block: '+str(blk[0])+' to '+str(blk[1]))
             self.get_prefetch_index(block=blk, device_num=idx+1)
+            
     # return prefetch begin, end index of the block's begin layer
     def get_prefetch_index(self, block, device_num):
+        # print('block '+str(block[0])+' to '+str(block[1]))
+        key = str(block[0])
         b = [0 for i in range(device_num)]
         e = [0 for i in range(device_num)]
         layer1 = block[0]
@@ -80,18 +95,8 @@ class Prefetcher:
                 #     print(b[idx], e[idx])
                 
         for idx in range(device_num):
-            print('device '+str(idx)+' should prefetch date from '+str(b[idx])+' to '+str(e[idx]))
-if __name__ == '__main__':
-    blocks = [
-        [0, 1],
-        [2, 3],
-        [4, 5],
-        [6, 8],
-        [9, 10]
-    ]
-    stride = [4.0, 2.0, 1.0, 2.0, 1.0, 1.0, 1.0, 2.0, '', '', '']
-    padding = [1.0, 0.0, 2.0, 0.0, 1.0, 1.0, 1.0, 0.0, '', '', '']
-    filter_size = [11.0, 3.0, 5.0, 3.0, 3.0, 3.0, 3.0, 3.0, '', '', '']
-    input_size = [224.0, 55.0, 27.0, 27.0, 13.0, 13.0, 13.0, 13.0, '', '', '']
-    output_size = [55.0, 27.0, 27.0, 13.0, 13.0, 13.0, 13.0, 6.0, '', '', '']
-    layer_type = ['conv', 'pool', 'conv', 'pool', 'conv', 'conv', 'conv', 'pool', 'FL', 'FL', 'FL']
+            self.json[idx][key] = [b[idx], e[idx]]
+            # print('device '+str(idx)+' should prefetch date from '+str(b[idx])+' to '+str(e[idx]))
+
+    def jsonify(self):
+        return json.dumps(self.json, indent=4)
