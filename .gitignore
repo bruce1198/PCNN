@@ -1,6 +1,7 @@
 data/
 models/
 codegen/
+codegen/*
 .DS_Store
 .vscode
 __pycache__

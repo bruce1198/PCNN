@@ -31,4 +31,4 @@ PCNN
 - AlexNet -> data/prefetch1.json
 - VGG16 &nbsp;&nbsp;-> data/prefetch2.json
 - VGG19 &nbsp;&nbsp;-> data/prefetch3.json
-5. load the weights from model you have created and build the sliced model in `slice.py`
+5. run `codegen.py` to generate the code for each devices in codegen folder.
