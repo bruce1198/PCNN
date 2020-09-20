@@ -18,6 +18,9 @@ class FCBlock:
     def append_layer(self, layer):
         self.layers.append(layer)
 
+    def get_weights(self):
+        return self.w
+
     def process(self, X):
         if self.mode == 'normal':
             if len(self.layers) != 1:
@@ -25,10 +28,21 @@ class FCBlock:
                 return
             else:
                 size = self.layers[0].shape[0]
+                size2 = self.layers[0].shape[1]
+                input_size = 6
+                stride = input_size * math.ceil(input_size/self.device_num)
                 # print(size)
+                # print(stride)
                 b = int(self.idx*math.ceil(size/self.device_num))
                 e = int(min((self.idx+1)*math.ceil(size/self.device_num), size))
-                ans = np.matmul(X, self.layers[0][b:e, :])
+                self.w = np.zeros(shape=(e-b, size2))
+                cnt = 0
+                for i in range(self.idx*stride, size, self.device_num * stride):
+                    offset = cnt * stride
+                    self.w[offset:offset+18, :] = self.layers[0][i:i+18, :]
+                    # print('w['+str(offset)+':'+str(offset+18)+'] = layer['+str(i)+':'+str(i+18)+']')
+                    cnt += 1
+                ans = np.matmul(X, self.w)
 
                 return ans
 

@@ -17,8 +17,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(4096, 4096)
         self.fc3 = nn.Linear(4096, 1000)
 
-    def forward(self, x, device_num):
-        x = self.pad(x, padding_value=2, device_num=device_num)
+    def forward(self, x):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = F.relu(self.conv3(x))
@@ -27,8 +26,8 @@ class Net(nn.Module):
         x = self.pool3(x)
         x = x.view(-1, 256 * 6 * 6)
         x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = self.fc3(x)
+        # x = F.relu(self.fc2(x))
+        # x = self.fc3(x)
         return x
 
 
@@ -45,18 +44,17 @@ print(y.shape)
 
 
 
-# import xlwt
-# import numpy as np
-# # real output
-# wb = xlwt.Workbook()
+import xlwt
+import numpy as np
+# real output
+wb = xlwt.Workbook()
 
-# sh = wb.add_sheet('output')
-# y = y.detach().numpy()
-# # print(y)
-# for i in range(27):
-#     for j in range(27):
-#         sh.write(i, j, float(y[0][95][i][j]))
+sh = wb.add_sheet('output')
+y = y.detach().numpy()
+# print(y)
+for i in range(10):
+    sh.write(i, 0, float(y[0][i]))
 
-# wb.save('correct_output.xls')
+wb.save('correct_output.xls')
 
 
