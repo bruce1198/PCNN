@@ -17,6 +17,10 @@ class FCBlock:
     
     def append_layer(self, layer):
         self.layers.append(layer)
+    
+    # for hybrid mode
+    def set_bias(self, bias):
+        self.bias = bias
 
     def get_weights(self):
         return self.w
@@ -35,15 +39,15 @@ class FCBlock:
                 # print(stride)
                 b = int(self.idx*math.ceil(size/self.device_num))
                 e = int(min((self.idx+1)*math.ceil(size/self.device_num), size))
-                self.w = np.zeros(shape=(e-b, size2))
+                w = np.float32(np.zeros(shape=(e-b, size2)))
                 cnt = 0
                 for i in range(self.idx*stride, size, self.device_num * stride):
                     offset = cnt * stride
-                    self.w[offset:offset+18, :] = self.layers[0][i:i+18, :]
+                    w[offset:offset+18, :] = self.layers[0][i:i+18, :]
                     # print('w['+str(offset)+':'+str(offset+18)+'] = layer['+str(i)+':'+str(i+18)+']')
                     cnt += 1
-                ans = np.matmul(X, self.w)
-
+                ans = np.matmul(X, w)
+                self.w = w
                 return ans
 
         elif self.mode == 'hybrid':
@@ -59,7 +63,7 @@ class FCBlock:
                 # print(b, e)
                 weights = self.layers[0][:, b:e]
                 # print(weights.shape)
-                a1 = relu(np.matmul(X, weights))
+                a1 = relu(np.matmul(X, weights) + self.bias[b: e])
 
                 # print(a1[-10:])
                 # print(a1.shape)

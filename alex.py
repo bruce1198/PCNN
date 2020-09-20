@@ -26,8 +26,8 @@ class Net(nn.Module):
         x = self.pool3(x)
         x = x.view(-1, 256 * 6 * 6)
         x = F.relu(self.fc1(x))
-        # x = F.relu(self.fc2(x))
-        # x = self.fc3(x)
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
         return x
 
 
@@ -39,9 +39,10 @@ net.load_state_dict(torch.load('models/model'))
 # real output
 x = torch.ones(1, 3, 224, 224)
 y = net(x)
-print(y.shape)
 
 
+# print(y.detach().numpy()[0][:50])
+# print(type(y.detach().numpy()[0][0]))
 
 
 import xlwt
@@ -52,7 +53,7 @@ wb = xlwt.Workbook()
 sh = wb.add_sheet('output')
 y = y.detach().numpy()
 # print(y)
-for i in range(10):
+for i in range(50):
     sh.write(i, 0, float(y[0][i]))
 
 wb.save('correct_output.xls')

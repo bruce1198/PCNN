@@ -40,6 +40,7 @@ class Net(nn.Module):
         return x
 
     def b4_forward(self, x, device_num):
+        self.device_num = device_num
         x = self.pad(x, padding_value=1)
         x = F.relu(self.conv5(x))
         x = self.pool3(x)
@@ -67,13 +68,14 @@ net = Net()
 net.load_state_dict(torch.load('models/model'))
 ################# setting ####################
 num_of_devices = 2
+num_of_blocks = 5
 ################# read json ##################
 import json
 with open('./data/prefetch1.json', 'r', encoding='utf-8') as f:
     index = json.load(f)
 
-start_index = np.zeros((num_of_devices, len(index[0])))
-end_index = np.zeros((num_of_devices, len(index[0])))
+start_index = np.zeros((num_of_devices, num_of_blocks))
+end_index = np.zeros((num_of_devices, num_of_blocks))
 # print(start_index.shape)
 for i in range(num_of_devices):
     # print(len(index[i]))
@@ -127,6 +129,8 @@ y = torch.ones(1, 384, 13, 13)
 y[:, :, 0:y1.shape[2], :] = y1
 y[:, :, y1.shape[2]:y1.shape[2]+y1.shape[2], :] = y2
 
+# print(y.view(-1).detach().numpy()[50:150])
+
 ################# block 4 ####################
 
 x1 = y[:, :, 0:8, :]
@@ -145,8 +149,8 @@ print(y1.shape)
 print(y2.shape)
 # replace a1, a2 with pooling result
 
-y_tmp = y.view(9216)
-# print(y_tmp[36:54])
+y_tmp = y.view(9216).detach().numpy()
+# print(y_tmp[:50])
 
 
 a1 = y1.view(4608)
@@ -156,12 +160,13 @@ a1 = a1.detach().numpy()
 a2 = a2.detach().numpy()
 
 w = net.fc1.weight.data.numpy().transpose()
+# print(w[:10, 0])
 
 fblk = FCBlock('normal', 0, 2)
 fblk.append_layer(w)
 y_partial0 = fblk.process(a1)
-print(np.matmul(a1, fblk.get_weights())[:10])
-print(y_partial0[:10])
+# print(fblk.get_weights()[:10, 0])
+# print(y_partial0[:10])
 
 fblk = FCBlock('normal', 1, 2)
 fblk.append_layer(w)
@@ -170,27 +175,30 @@ y_partial1 = fblk.process(a2)
 def relu(x):
     return np.maximum(0, x)
 
-block4_output = relu(y_partial0 + y_partial1)
+block4_output = relu(y_partial0 + y_partial1 + net.fc1.bias.detach().numpy())
 
-print(block4_output[:10])
+# print(block4_output[:50])
 
 # ################# block 5 ####################
-# w1 = net.fc2.weight.data.numpy().transpose()
-# w2 = net.fc3.weight.data.numpy().transpose()
+w1 = net.fc2.weight.data.numpy().transpose()
+w2 = net.fc3.weight.data.numpy().transpose()
 
 
-# fblk = FCBlock('hybrid', 0, 2)
-# fblk.append_layer(w1)
-# fblk.append_layer(w2)
-# y_partial0 = fblk.process(block4_output)
+fblk = FCBlock('hybrid', 0, 2)
+fblk.set_bias(net.fc2.bias.detach().numpy())
+fblk.append_layer(w1)
+fblk.append_layer(w2)
+y_partial0 = fblk.process(block4_output)
 
-# fblk = FCBlock('hybrid', 1, 2)
-# fblk.append_layer(w1)
-# fblk.append_layer(w2)
-# y_partial1 = fblk.process(block4_output)
+fblk = FCBlock('hybrid', 1, 2)
+fblk.set_bias(net.fc2.bias.detach().numpy())
+fblk.append_layer(w1)
+fblk.append_layer(w2)
+y_partial1 = fblk.process(block4_output)
 
-# block5_output = y_partial0 + y_partial1
+block5_output = y_partial0 + y_partial1 + net.fc3.bias.detach().numpy()
 
+print(block5_output[:50])
 # # print(block5_output.shape)
 
 ##############################################
