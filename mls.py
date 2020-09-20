@@ -8,28 +8,39 @@ class Prefetcher:
         self.name = name
         self.slicing_blocks = [[] for i in range(total_device_num)]
         self.total_time = [0 for i in range(total_device_num)]
-        self.json = []
+        self.json = {}
 
     def set_stride(self, stride):
         self.stride = stride
+        self.json['stride'] = stride
 
     def set_filter(self, filter_size):
         self.filter_size = filter_size
+        self.json['filter'] = filter_size
 
     def set_padding(self, padding):
         self.padding = padding
+        self.json['padding'] = padding
 
     def set_input(self, input_size):
         self.input_size = input_size
+        self.json['input'] = input_size
 
     def set_output(self, output_size):
         self.output_size = output_size
+        self.json['output'] = output_size
 
     def set_channel(self, input_channel):
         self.input_channel = input_channel
+        self.json['in_channel'] = input_channel
+
+    def set_channel_out(self, output_channel):
+        self.output_channel = output_channel
+        self.json['out_channel'] = output_channel
 
     def set_layer_type(self, layer_type):
         self.layer_type = layer_type
+        self.json['layers'] = layer_type
 
     def append_slicing_blocks(self, blocks, device_num, total_time):
         self.slicing_blocks[device_num] = blocks
@@ -47,14 +58,14 @@ class Prefetcher:
     def prefetch(self):
         idx = self.get_fastest_slicing_blocks()
         blocks = self.slicing_blocks[idx]
-        self.json = [{} for i in range(idx+1)]
+        self.json['devices'] = [{} for i in range(idx+1)]
         for blk in blocks:
             self.get_prefetch_index(block=blk, device_num=idx+1)
             
     # return prefetch begin, end index of the block's begin layer
     def get_prefetch_index(self, block, device_num):
         # print('block '+str(block[0])+' to '+str(block[1]))
-        key = str(block[0])
+        key = str(block[0])+','+str(block[1])
         b = [0 for i in range(device_num)]
         e = [0 for i in range(device_num)]
         layer1 = block[0]
@@ -95,7 +106,7 @@ class Prefetcher:
                 #     print(b[idx], e[idx])
                 
         for idx in range(device_num):
-            self.json[idx][key] = [b[idx], e[idx]]
+            self.json['devices'][idx][key] = [b[idx], e[idx]]
             # print('device '+str(idx)+' should prefetch date from '+str(b[idx])+' to '+str(e[idx]))
 
     def jsonify(self):

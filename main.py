@@ -4,6 +4,10 @@ import math
 from config import *
 import xlwt
 from mls import Prefetcher
+import os
+
+if not os.path.exists('data'):
+    os.mkdir('data')
 
 data = xlrd.open_workbook('DL_config.xlsx')
 
@@ -952,6 +956,7 @@ for model in range(model_length):
     prefetcher.set_input(input_size[model])
     prefetcher.set_output(output_size[model])
     prefetcher.set_channel(input_channel[model])
+    prefetcher.set_channel_out(output_channel[model])
     prefetcher.set_layer_type(layer_type[model])
     for device in range(1, total_device_num+1):
         if device == 1:
@@ -988,8 +993,6 @@ for model in range(model_length):
             for k in device_slice[model][device][layer]:
                 sheet1.write(i, (device-1)*2, str(pre_tmp)+" to "+str(k))
                 blocks.append([pre_tmp, k])
-                if model == 1 and device==2:
-                    print(pre_tmp, k)
                 sheet1.write(i, (device-1)*2+1,
                              tmp_execution_time_k_1)
                 pre_tmp = k+1

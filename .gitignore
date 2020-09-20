@@ -1,6 +1,6 @@
 data/
 models/
+codegen/
 .DS_Store
 .vscode
 __pycache__
-test.py
