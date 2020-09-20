@@ -83,8 +83,22 @@ class Prefetcher:
                         # prev layer is pool or conv
                         if self.layer_type[layer-1] != 'FL':
                             o = self.output_size[layer-1]
-                            b[idx] = int(idx*math.ceil(o/device_num))
-                            e[idx] = int(min((idx+1)*math.ceil(o/device_num), o)-1)
+                            avg = int(math.floor(o/device_num))
+                            total = avg
+                            mod = o % device_num
+                            start = 0
+                            for i in range(idx):
+                                if i < mod:
+                                    start += avg+1
+                                else:
+                                    start += avg
+                            if idx < mod:
+                                total += 1
+                            end = start + total - 1
+                            b[idx] = start
+                            e[idx] = end
+                            # b[idx] = int(idx*math.ceil(o/device_num))
+                            # e[idx] = int(min((idx+1)*math.ceil(o/device_num), o)-1)
                         # consecutive FL
                         else:
                             # dont care the prev layer @@
@@ -97,8 +111,22 @@ class Prefetcher:
                     o = self.output_size[layer]
                     # last layer
                     if layer == layer2:
-                        b[idx] = int(idx*math.ceil(o/device_num))
-                        e[idx] = int(min((idx+1)*math.ceil(o/device_num), o)-1)
+                        avg = int(math.floor(o/device_num))
+                        total = avg
+                        mod = o % device_num
+                        start = 0
+                        for i in range(idx):
+                            if i < mod:
+                                start += avg+1
+                            else:
+                                start += avg
+                        if idx < mod:
+                            total += 1
+                        end = start + total - 1
+                        b[idx] = start
+                        e[idx] = end
+                        # b[idx] = int(idx*math.ceil(o/device_num))
+                        # e[idx] = int(min((idx+1)*math.ceil(o/device_num), o)-1)
                     # print(idx, b[idx], e[idx])
                     b[idx] = int(max(b[idx]*s-p, 0))
                     e[idx] = int(min(max(e[idx]*s-p+fs-1,0), i-1))

@@ -733,7 +733,8 @@ def slice_layer(model_type, start_layer, end_layer, device_num):
                         slice_input_width = input_size[model_type][layer]
                         FLOPs[device] += cal_FLOPs((output_height[device][1]-output_height[device][0]+1),
                                                    output_width, layer, layer_type[model_type][layer], model_type)
-                        # print(output_height[device])
+                        # if model_type == 1:
+                        #     print(output_height[device])
                         # print(FLOPs[device])
                         # print(slice_input_height[device])
                     else:
