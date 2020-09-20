@@ -40,8 +40,7 @@ net.load_state_dict(torch.load('models/model'))
 x = torch.ones(1, 3, 224, 224)
 y = net(x)
 
-
-# print(y.detach().numpy()[0][:50])
+print(y.view(-1).detach().numpy()[-50:])
 # print(type(y.detach().numpy()[0][0]))
 
 
