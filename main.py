@@ -4,6 +4,10 @@ import math
 from config import *
 import xlwt
 from mls import Prefetcher
+import os
+
+if not os.path.exists('data'):
+    os.mkdir('data')
 
 data = xlrd.open_workbook('DL_config.xlsx')
 

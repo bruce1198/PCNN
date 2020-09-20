@@ -1,4 +1,5 @@
 import json
+import os
 
 with open('data/prefetch1.json') as f:
     data = json.loads(f.read())
@@ -8,6 +9,9 @@ total_device_num = len(data['devices'])
 total_block_num  = len(data['devices'][0].keys())
 
 for device_idx, device in enumerate(data['devices']):
+    if not os.path.exists('codegen'):
+        os.mkdir('codegen')
+        os.mkdir('codegen/alexnet')
     with open('codegen/alexnet/device'+str(device_idx)+'.py', 'w') as f:
         ########################## write header ########################
         f.write('import torch\n')
