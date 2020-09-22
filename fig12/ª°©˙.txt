@@ -1,7 +1,0 @@
-由A到J 分別代表設備數 1~10
-第一個 row 是計算時間單位是秒
-第二個 row 是傳輸時間單位是秒
-加起來就是總執行時間了
-
-下方有 8 個 tab 可以切換
-左邊4個是 MLS 右邊 4 個是 SLS/Users/kwang/Desktop/專題/Users/kwang/Desktop/專題

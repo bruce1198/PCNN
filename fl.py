@@ -24,6 +24,9 @@ class FCBlock:
 
     def get_weights(self):
         return self.w
+    
+    def set_input_size(self, input_size):
+        self.input_size = input_size
 
     def process(self, X):
         if self.mode == 'normal':
@@ -33,18 +36,30 @@ class FCBlock:
             else:
                 size = self.layers[0].shape[0]
                 size2 = self.layers[0].shape[1]
-                input_size = 6
-                stride = input_size * math.ceil(input_size/self.device_num)
+                input_size = int(self.input_size)
+                avg = int(math.floor(input_size/self.device_num))
+                total = avg
+                mod = input_size % self.device_num
+                start = 0
+                for ii in range(self.idx):
+                    if ii < mod:
+                        start += avg+1
+                    else:
+                        start += avg
+                if self.idx < mod:
+                    total += 1
+                height = total
+                stride = input_size * input_size
                 # print(size)
                 # print(stride)
-                b = int(self.idx*math.ceil(size/self.device_num))
-                e = int(min((self.idx+1)*math.ceil(size/self.device_num), size))
-                w = np.float32(np.zeros(shape=(e-b, size2)))
+                height1 = int(size * height / input_size)
+                w = np.float32(np.zeros(shape=(height1, size2)))
                 cnt = 0
-                for i in range(self.idx*stride, size, self.device_num * stride):
-                    offset = cnt * stride
-                    w[offset:offset+18, :] = self.layers[0][i:i+18, :]
-                    # print('w['+str(offset)+':'+str(offset+18)+'] = layer['+str(i)+':'+str(i+18)+']')
+                # print(start)
+                for i in range(start*input_size, size, stride):
+                    pos = cnt * height*input_size
+                    w[pos:pos+height*input_size, :] = self.layers[0][i:i+height*input_size, :]
+                    # print('w['+str(pos)+':'+str(pos+height*input_size)+'] = layer['+str(i)+':'+str(i+height*input_size)+']')
                     cnt += 1
                 ans = np.matmul(X, w)
                 self.w = w
