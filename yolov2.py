@@ -137,15 +137,15 @@ num_of_blocks = 7
 y = torch.ones(1, 3, 608, 608)
 x1 = y[:, :, 0:115, :]
 y1 = net.b0_forward(x1, 0)
-x2 = y[:, :, 93:219, :]
+x2 = y[:, :, 93:11, :]
 y2 = net.b0_forward(x2, 1)
-x3 = y[:, :, 197:323, :]
+x3 = y[:, :, 197:15, :]
 y3 = net.b0_forward(x3, 2)
-x4 = y[:, :, 301:427, :]
+x4 = y[:, :, 301:19, :]
 y4 = net.b0_forward(x4, 3)
-x5 = y[:, :, 405:531, :]
+x5 = y[:, :, 405:23, :]
 y5 = net.b0_forward(x5, 4)
-x6 = y[:, :, 509:608, :]
+x6 = y[:, :, 501:27, :]
 y6 = net.b0_forward(x6, 5)
 
 y = torch.ones(1, 128, 76, 76)
@@ -166,15 +166,15 @@ offset += y6.shape[2]
 
 x1 = y[:, :, 0:16, :]
 y1 = net.b1_forward(x1, 0)
-x2 = y[:, :, 12:30, :]
+x2 = y[:, :, 12:2, :]
 y2 = net.b1_forward(x2, 1)
-x3 = y[:, :, 26:44, :]
+x3 = y[:, :, 26:3, :]
 y3 = net.b1_forward(x3, 2)
-x4 = y[:, :, 40:58, :]
+x4 = y[:, :, 38:4, :]
 y4 = net.b1_forward(x4, 3)
-x5 = y[:, :, 54:72, :]
+x5 = y[:, :, 50:5, :]
 y5 = net.b1_forward(x5, 4)
-x6 = y[:, :, 68:76, :]
+x6 = y[:, :, 62:6, :]
 y6 = net.b1_forward(x6, 5)
 
 y = torch.ones(1, 256, 38, 38)
@@ -195,15 +195,15 @@ offset += y6.shape[2]
 
 x1 = y[:, :, 0:8, :]
 y1 = net.b2_forward(x1, 0)
-x2 = y[:, :, 6:15, :]
+x2 = y[:, :, 6:1, :]
 y2 = net.b2_forward(x2, 1)
-x3 = y[:, :, 13:22, :]
+x3 = y[:, :, 13:2, :]
 y3 = net.b2_forward(x3, 2)
-x4 = y[:, :, 20:29, :]
+x4 = y[:, :, 19:3, :]
 y4 = net.b2_forward(x4, 3)
-x5 = y[:, :, 27:36, :]
+x5 = y[:, :, 25:4, :]
 y5 = net.b2_forward(x5, 4)
-x6 = y[:, :, 34:38, :]
+x6 = y[:, :, 31:5, :]
 y6 = net.b2_forward(x6, 5)
 
 y = torch.ones(1, 256, 38, 38)
@@ -220,20 +220,19 @@ y[:, :, offset: offset+y5.shape[2], :] = y5
 offset += y5.shape[2]
 y[:, :, offset: offset+y6.shape[2], :] = y6
 offset += y6.shape[2]
-
 ################# block 3 ####################
 
 x1 = y[:, :, 0:10, :]
 y1 = net.b3_forward(x1, 0)
-x2 = y[:, :, 6:18, :]
+x2 = y[:, :, 6:2, :]
 y2 = net.b3_forward(x2, 1)
-x3 = y[:, :, 14:26, :]
+x3 = y[:, :, 12:3, :]
 y3 = net.b3_forward(x3, 2)
-x4 = y[:, :, 22:34, :]
+x4 = y[:, :, 18:4, :]
 y4 = net.b3_forward(x4, 3)
-x5 = y[:, :, 30:38, :]
+x5 = y[:, :, 24:5, :]
 y5 = net.b3_forward(x5, 4)
-x6 = y[:, :, 38:38, :]
+x6 = y[:, :, 30:6, :]
 y6 = net.b3_forward(x6, 5)
 
 y = torch.ones(1, 512, 19, 19)
@@ -254,15 +253,15 @@ offset += y6.shape[2]
 
 x1 = y[:, :, 0:5, :]
 y1 = net.b4_forward(x1, 0)
-x2 = y[:, :, 3:9, :]
+x2 = y[:, :, 3:1, :]
 y2 = net.b4_forward(x2, 1)
-x3 = y[:, :, 7:13, :]
+x3 = y[:, :, 6:2, :]
 y3 = net.b4_forward(x3, 2)
-x4 = y[:, :, 11:17, :]
+x4 = y[:, :, 9:3, :]
 y4 = net.b4_forward(x4, 3)
-x5 = y[:, :, 15:19, :]
+x5 = y[:, :, 12:4, :]
 y5 = net.b4_forward(x5, 4)
-x6 = y[:, :, 19:19, :]
+x6 = y[:, :, 15:5, :]
 y6 = net.b4_forward(x6, 5)
 
 y = torch.ones(1, 512, 19, 19)
@@ -283,15 +282,15 @@ offset += y6.shape[2]
 
 x1 = y[:, :, 0:5, :]
 y1 = net.b5_forward(x1, 0)
-x2 = y[:, :, 3:9, :]
+x2 = y[:, :, 3:1, :]
 y2 = net.b5_forward(x2, 1)
-x3 = y[:, :, 7:13, :]
+x3 = y[:, :, 6:2, :]
 y3 = net.b5_forward(x3, 2)
-x4 = y[:, :, 11:17, :]
+x4 = y[:, :, 9:3, :]
 y4 = net.b5_forward(x4, 3)
-x5 = y[:, :, 15:19, :]
+x5 = y[:, :, 12:4, :]
 y5 = net.b5_forward(x5, 4)
-x6 = y[:, :, 19:19, :]
+x6 = y[:, :, 15:5, :]
 y6 = net.b5_forward(x6, 5)
 
 y = torch.ones(1, 512, 19, 19)
@@ -312,15 +311,15 @@ offset += y6.shape[2]
 
 x1 = y[:, :, 0:8, :]
 y1 = net.b6_forward(x1, 0)
-x2 = y[:, :, 0:12, :]
+x2 = y[:, :, 0:4, :]
 y2 = net.b6_forward(x2, 1)
-x3 = y[:, :, 4:16, :]
+x3 = y[:, :, 3:5, :]
 y3 = net.b6_forward(x3, 2)
-x4 = y[:, :, 8:19, :]
+x4 = y[:, :, 6:6, :]
 y4 = net.b6_forward(x4, 3)
-x5 = y[:, :, 12:19, :]
+x5 = y[:, :, 9:7, :]
 y5 = net.b6_forward(x5, 4)
-x6 = y[:, :, 16:19, :]
+x6 = y[:, :, 12:8, :]
 y6 = net.b6_forward(x6, 5)
 
 y = torch.ones(1, 425, 19, 19)

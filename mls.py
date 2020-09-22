@@ -130,8 +130,8 @@ class Prefetcher:
                     # print(idx, b[idx], e[idx])
                     b[idx] = int(max(b[idx]*s-p, 0))
                     e[idx] = int(min(max(e[idx]*s-p+fs-1,0), i-1))
-                # if idx == 0:
-                #     print(b[idx], e[idx])
+                if idx == 1 and self.name == '0':
+                    print(b[idx], e[idx])
                 
         for idx in range(device_num):
             self.json['devices'][idx][key] = [b[idx], e[idx]]
