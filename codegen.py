@@ -56,6 +56,7 @@ try:
                     f.write('\t\tself.device_num = device_num\n')
                     begin = int(key.split(',')[0])
                     end = int(key.split(',')[1])
+                    hybrid = False
                     for i in range(begin, end+1):
                         if data['layers'][i] == 'conv':
                             f.write('\t\tx = self.pad(x, padding_value='+str(int(data['padding'][i]))+')\n')
@@ -65,6 +66,28 @@ try:
                             f.write('\t\tx = self.pool'+str(pool_idx)+'(x)\n')
                             pool_idx += 1
                         elif data['layers'][i] == 'FL':
+                            if hybrid:
+                                continue
+                            if i+1 <= end:
+                                # hybrid
+                                if data['layers'][i+1] == 'FL':
+                                    f.write('\t\tw1 = self.fc'+str(fc_idx)+'.weight.data.numpy().transpose()\n')
+                                    f.write('\t\tw2 = self.fc'+str(fc_idx+1)+'.weight.data.numpy().transpose()\n')
+                                    f.write('\t\tfblk = FCBlock(\'hybrid\', device_num, '+str(total_device_num)+')\n')
+                                    f.write('\t\tfblk.set_bias(self.fc'+str(fc_idx)+'.bias.detach().numpy())\n')
+                                    f.write('\t\tfblk.append_layer(w1)\n')
+                                    f.write('\t\tfblk.append_layer(w2)\n')
+                                    f.write('\t\tx = fblk.process(x)\n')
+                                    hybrid = True
+                            # single fl
+                            else:
+                                if i-1 >= begin:
+                                    if data['layers'][i-1] == 'conv' or data['layers'][i-1] == 'pool':
+                                        f.write('\t\tx = x.view(-1).detach().numpy()\n')
+                                f.write('\t\tw = self.fc'+str(fc_idx)+'.weight.data.numpy().transpose()\n')
+                                f.write('\t\tfblk = FCBlock(\'normal\', device_num, '+str(total_device_num)+')\n')
+                                f.write('\t\tfblk.append_layer(w)\n')
+                                f.write('\t\tx = fblk.process(x)\n')
                             # f.write('\t\tself.fc'+str(fc_idx)+' = nn.Linear('+str(int(data['in_channel'][idx]))+', '+str(int(data['out_channel'][idx]))+')\n')
                             fc_idx += 1
                     f.write('\t\treturn x\n')
@@ -88,6 +111,7 @@ try:
                 f.write('num_of_devices = '+str(total_device_num)+'\n')
                 f.write('num_of_blocks = '+str(total_block_num)+'\n')
 
+                fc_idx = 0
                 for block_idx, key in enumerate(data['devices'][0].keys()):
                     f.write('################# block '+str(block_idx)+' ####################\n\n')
                     layer_start = int(key.split(',')[0])
@@ -96,16 +120,28 @@ try:
                     # print(device[key])
                     if block_idx == 0:
                         f.write('y = torch.ones(1, 3, '+str(int(data['input'][0]))+', '+str(int(data['input'][0]))+')\n')
-                    for idx, device in enumerate(data['devices']):
-                        start = device[key][0]
-                        end = device[key][1]
-                        f.write('x'+str(idx+1)+' = y[:, :, '+str(start)+':'+str(end+1)+', :]\n')
-                        f.write('y'+str(idx+1)+' = net.b'+str(block_idx)+'_forward(x'+str(idx+1)+', '+str(idx)+')\n')
-                        # f.write('\n')
+                    if data['layers'][layer_start] == 'FL':
+                        fc_idx += 1
+                        for idx, device in enumerate(data['devices']):
+                            f.write('y'+str(idx+1)+' = net.b'+str(block_idx)+'_forward(y, '+str(idx)+')\n')
+                    else:
+                        for idx, device in enumerate(data['devices']):
+                            start = device[key][0]
+                            end = device[key][1]
+                            f.write('x'+str(idx+1)+' = y[:, :, '+str(start)+':'+str(end+1)+', :]\n')
+                            f.write('y'+str(idx+1)+' = net.b'+str(block_idx)+'_forward(x'+str(idx+1)+', '+str(idx)+')\n')
+                            # f.write('\n')
                     f.write('\n')
-                    if data['output'][layer_end] == "":
-                        pass
-                        # f.write('y = torch.ones(1, '+str(int(data['out_channel'][layer_end]))+', '+str(int(data['output'][layer_end]))+', '+str(int(data['output'][layer_end]))+')\n')
+                    if data['layers'][layer_end] == 'FL':
+                        fc_idx += 1
+                        f.write('y = ')
+                        if layer_end != len(data['layers'])-1:
+                            f.write('relu(')
+                        for idx, device in enumerate(data['devices']):
+                            f.write('y'+str(idx+1)+' + ') 
+                        f.write('net.fc'+str(fc_idx)+'.bias.detach().numpy()')
+                        if layer_end != len(data['layers'])-1:
+                            f.write(')\n')
                     else:
                         f.write('y = torch.ones(1, '+str(int(data['out_channel'][layer_end]))+', '+str(int(data['output'][layer_end]))+', '+str(int(data['output'][layer_end]))+')\n')
                         f.write('offset = 0\n')

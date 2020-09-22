@@ -115,8 +115,8 @@ class Prefetcher:
                         total = avg
                         mod = o % device_num
                         start = 0
-                        for i in range(idx):
-                            if i < mod:
+                        for ii in range(idx):
+                            if ii < mod:
                                 start += avg+1
                             else:
                                 start += avg
@@ -130,8 +130,6 @@ class Prefetcher:
                     # print(idx, b[idx], e[idx])
                     b[idx] = int(max(b[idx]*s-p, 0))
                     e[idx] = int(min(max(e[idx]*s-p+fs-1,0), i-1))
-                if idx == 1 and self.name == '0':
-                    print(b[idx], e[idx])
                 
         for idx in range(device_num):
             self.json['devices'][idx][key] = [b[idx], e[idx]]

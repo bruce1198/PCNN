@@ -51,10 +51,22 @@ class Net(nn.Module):
 		x = self.pad(x, padding_value=1)
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
+		x = x.view(-1).detach().numpy()
+		w = self.fc1.weight.data.numpy().transpose()
+		fblk = FCBlock('normal', device_num, 2)
+		fblk.append_layer(w)
+		x = fblk.process(x)
 		return x
 
 	def b4_forward(self, x, device_num):
 		self.device_num = device_num
+		w1 = self.fc2.weight.data.numpy().transpose()
+		w2 = self.fc3.weight.data.numpy().transpose()
+		fblk = FCBlock('hybrid', device_num, 2)
+		fblk.set_bias(self.fc2.bias.detach().numpy())
+		fblk.append_layer(w1)
+		fblk.append_layer(w2)
+		x = fblk.process(x)
 		return x
 
 	def pad(self, x, padding_value):
@@ -68,7 +80,10 @@ class Net(nn.Module):
 		return x
 
 net = Net()
+# torch.save(net.state_dict(), 'models/alexnet')
 net.load_state_dict(torch.load('models/alexnet'))
+# y = net(torch.ones(1, 3, 224, 224))
+# print(y[:50])
 ################# setting ####################
 num_of_devices = 2
 num_of_blocks = 5
@@ -77,7 +92,7 @@ num_of_blocks = 5
 y = torch.ones(1, 3, 224, 224)
 x1 = y[:, :, 0:121, :]
 y1 = net.b0_forward(x1, 0)
-x2 = y[:, :, 110:5, :]
+x2 = y[:, :, 110:224, :]
 y2 = net.b0_forward(x2, 1)
 
 y = torch.ones(1, 96, 27, 27)
@@ -90,7 +105,7 @@ offset += y2.shape[2]
 
 x1 = y[:, :, 0:17, :]
 y1 = net.b1_forward(x1, 0)
-x2 = y[:, :, 12:2, :]
+x2 = y[:, :, 12:27, :]
 y2 = net.b1_forward(x2, 1)
 
 y = torch.ones(1, 256, 13, 13)
@@ -103,7 +118,7 @@ offset += y2.shape[2]
 
 x1 = y[:, :, 0:9, :]
 y1 = net.b2_forward(x1, 0)
-x2 = y[:, :, 5:1, :]
+x2 = y[:, :, 5:13, :]
 y2 = net.b2_forward(x2, 1)
 
 y = torch.ones(1, 384, 13, 13)
@@ -119,10 +134,12 @@ y1 = net.b3_forward(x1, 0)
 x2 = y[:, :, 5:13, :]
 y2 = net.b3_forward(x2, 1)
 
+y = relu(y1 + y2 + net.fc1.bias.detach().numpy())
 ################# block 4 ####################
 
-x1 = y[:, :, 0:4096, :]
-y1 = net.b4_forward(x1, 0)
-x2 = y[:, :, 0:4096, :]
-y2 = net.b4_forward(x2, 1)
+y1 = net.b4_forward(y, 0)
+y2 = net.b4_forward(y, 1)
 
+y = y1 + y2 + net.fc3.bias.detach().numpy()
+
+print(y[:50])

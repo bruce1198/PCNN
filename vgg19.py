@@ -88,10 +88,22 @@ class Net(nn.Module):
 		x = self.pad(x, padding_value=1)
 		x = F.relu(self.conv16(x))
 		x = self.pool5(x)
+		x = x.view(-1).detach().numpy()
+		w = self.fc1.weight.data.numpy().transpose()
+		fblk = FCBlock('normal', device_num, 7)
+		fblk.append_layer(w)
+		x = fblk.process(x)
 		return x
 
 	def b4_forward(self, x, device_num):
 		self.device_num = device_num
+		w1 = self.fc2.weight.data.numpy().transpose()
+		w2 = self.fc3.weight.data.numpy().transpose()
+		fblk = FCBlock('hybrid', device_num, 7)
+		fblk.set_bias(self.fc2.bias.detach().numpy())
+		fblk.append_layer(w1)
+		fblk.append_layer(w2)
+		x = fblk.process(x)
 		return x
 
 	def pad(self, x, padding_value):
@@ -114,17 +126,17 @@ num_of_blocks = 5
 y = torch.ones(1, 3, 224, 224)
 x1 = y[:, :, 0:54, :]
 y1 = net.b0_forward(x1, 0)
-x2 = y[:, :, 10:22, :]
+x2 = y[:, :, 10:86, :]
 y2 = net.b0_forward(x2, 1)
-x3 = y[:, :, 42:26, :]
+x3 = y[:, :, 42:118, :]
 y3 = net.b0_forward(x3, 2)
-x4 = y[:, :, 74:30, :]
+x4 = y[:, :, 74:150, :]
 y4 = net.b0_forward(x4, 3)
-x5 = y[:, :, 106:34, :]
+x5 = y[:, :, 106:182, :]
 y5 = net.b0_forward(x5, 4)
-x6 = y[:, :, 138:38, :]
+x6 = y[:, :, 138:214, :]
 y6 = net.b0_forward(x6, 5)
-x7 = y[:, :, 170:42, :]
+x7 = y[:, :, 170:224, :]
 y7 = net.b0_forward(x7, 6)
 
 y = torch.ones(1, 256, 28, 28)
@@ -147,17 +159,17 @@ offset += y7.shape[2]
 
 x1 = y[:, :, 0:8, :]
 y1 = net.b1_forward(x1, 0)
-x2 = y[:, :, 0:4, :]
+x2 = y[:, :, 0:12, :]
 y2 = net.b1_forward(x2, 1)
-x3 = y[:, :, 4:5, :]
+x3 = y[:, :, 4:16, :]
 y3 = net.b1_forward(x3, 2)
-x4 = y[:, :, 8:6, :]
+x4 = y[:, :, 8:20, :]
 y4 = net.b1_forward(x4, 3)
-x5 = y[:, :, 12:7, :]
+x5 = y[:, :, 12:24, :]
 y5 = net.b1_forward(x5, 4)
-x6 = y[:, :, 16:8, :]
+x6 = y[:, :, 16:28, :]
 y6 = net.b1_forward(x6, 5)
-x7 = y[:, :, 20:9, :]
+x7 = y[:, :, 20:28, :]
 y7 = net.b1_forward(x7, 6)
 
 y = torch.ones(1, 512, 14, 14)
@@ -180,17 +192,17 @@ offset += y7.shape[2]
 
 x1 = y[:, :, 0:4, :]
 y1 = net.b2_forward(x1, 0)
-x2 = y[:, :, 0:1, :]
+x2 = y[:, :, 0:6, :]
 y2 = net.b2_forward(x2, 1)
-x3 = y[:, :, 2:2, :]
+x3 = y[:, :, 2:8, :]
 y3 = net.b2_forward(x3, 2)
-x4 = y[:, :, 4:3, :]
+x4 = y[:, :, 4:10, :]
 y4 = net.b2_forward(x4, 3)
-x5 = y[:, :, 6:4, :]
+x5 = y[:, :, 6:12, :]
 y5 = net.b2_forward(x5, 4)
-x6 = y[:, :, 8:5, :]
+x6 = y[:, :, 8:14, :]
 y6 = net.b2_forward(x6, 5)
-x7 = y[:, :, 10:6, :]
+x7 = y[:, :, 10:14, :]
 y7 = net.b2_forward(x7, 6)
 
 y = torch.ones(1, 512, 14, 14)
@@ -226,20 +238,15 @@ y6 = net.b3_forward(x6, 5)
 x7 = y[:, :, 10:14, :]
 y7 = net.b3_forward(x7, 6)
 
+y = relu(y1 + y2 + y3 + y4 + y5 + y6 + y7 + net.fc1.bias.detach().numpy())
 ################# block 4 ####################
 
-x1 = y[:, :, 0:4096, :]
-y1 = net.b4_forward(x1, 0)
-x2 = y[:, :, 0:4096, :]
-y2 = net.b4_forward(x2, 1)
-x3 = y[:, :, 0:4096, :]
-y3 = net.b4_forward(x3, 2)
-x4 = y[:, :, 0:4096, :]
-y4 = net.b4_forward(x4, 3)
-x5 = y[:, :, 0:4096, :]
-y5 = net.b4_forward(x5, 4)
-x6 = y[:, :, 0:4096, :]
-y6 = net.b4_forward(x6, 5)
-x7 = y[:, :, 0:4096, :]
-y7 = net.b4_forward(x7, 6)
+y1 = net.b4_forward(y, 0)
+y2 = net.b4_forward(y, 1)
+y3 = net.b4_forward(y, 2)
+y4 = net.b4_forward(y, 3)
+y5 = net.b4_forward(y, 4)
+y6 = net.b4_forward(y, 5)
+y7 = net.b4_forward(y, 6)
 
+y = y1 + y2 + y3 + y4 + y5 + y6 + y7 + net.fc3.bias.detach().numpy()
