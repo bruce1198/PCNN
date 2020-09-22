@@ -1,13 +1,6 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from fl import FCBlock
-import numpy as np
-
-import json
-
-def relu(x):
-	return np.maximum(x, 0)
 
 class Net(nn.Module):
 	def __init__(self):

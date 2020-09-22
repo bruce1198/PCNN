@@ -180,7 +180,8 @@ offset += y7.shape[2]
 
 x1 = y[:, :, 0:5, :]
 y1 = net.b2_forward(x1, 0)
-x2 = y[:, :, 0:7, :]
+x2 = torch.zeros(1, 512, 8, 14)
+x2[:, :, 1:8, :] = y[:, :, 0:7, :]
 y2 = net.b2_forward(x2, 1)
 x3 = y[:, :, 1:9, :]
 y3 = net.b2_forward(x3, 2)
@@ -188,7 +189,8 @@ x4 = y[:, :, 3:11, :]
 y4 = net.b2_forward(x4, 3)
 x5 = y[:, :, 5:13, :]
 y5 = net.b2_forward(x5, 4)
-x6 = y[:, :, 7:14, :]
+x6 = torch.zeros(1, 512, 8, 14)
+x6[:, :, 0:7, :] = y[:, :, 7:14, :]
 y6 = net.b2_forward(x6, 5)
 x7 = y[:, :, 9:14, :]
 y7 = net.b2_forward(x7, 6)
@@ -205,3 +207,5 @@ y6 = net.b3_forward(y, 5)
 y7 = net.b3_forward(y, 6)
 
 y = y1 + y2 + y3 + y4 + y5 + y6 + y7 + net.fc3.bias.detach().numpy()
+
+print(y[:50])
