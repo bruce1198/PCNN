@@ -144,9 +144,9 @@ for model in range(4):
             f.write('import torch\n')
             f.write('import torch.nn as nn\n')
             f.write('import torch.nn.functional as F\n')
-            f.write('from fl import FCBlock\n')
-            f.write('import numpy as np\n\n')
-            f.write('import json\n\n')
+            f.write('import numpy as np\n')
+            f.write('import json\n')
+            f.write('from fl import FCBlock\n\n')
 
             ######################## write relu function ####################
 
