@@ -86,6 +86,7 @@ try:
                                         f.write('\t\tx = x.view(-1).detach().numpy()\n')
                                 f.write('\t\tw = self.fc'+str(fc_idx)+'.weight.data.numpy().transpose()\n')
                                 f.write('\t\tfblk = FCBlock(\'normal\', device_num, '+str(total_device_num)+')\n')
+                                f.write('\t\tfblk.set_input_size('+str(data['output'][i-1])+')\n')
                                 f.write('\t\tfblk.append_layer(w)\n')
                                 f.write('\t\tx = fblk.process(x)\n')
                             # f.write('\t\tself.fc'+str(fc_idx)+' = nn.Linear('+str(int(data['in_channel'][idx]))+', '+str(int(data['out_channel'][idx]))+')\n')

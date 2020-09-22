@@ -91,6 +91,7 @@ class Net(nn.Module):
 		x = x.view(-1).detach().numpy()
 		w = self.fc1.weight.data.numpy().transpose()
 		fblk = FCBlock('normal', device_num, 7)
+		fblk.set_input_size(7.0)
 		fblk.append_layer(w)
 		x = fblk.process(x)
 		return x
@@ -250,3 +251,4 @@ y6 = net.b4_forward(y, 5)
 y7 = net.b4_forward(y, 6)
 
 y = y1 + y2 + y3 + y4 + y5 + y6 + y7 + net.fc3.bias.detach().numpy()
+print(y[:50])

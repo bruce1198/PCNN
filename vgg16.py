@@ -74,13 +74,13 @@ class Net(nn.Module):
 		x = F.relu(self.conv12(x))
 		x = self.pad(x, padding_value=1)
 		x = F.relu(self.conv13(x))
-		print(x.shape)
-		# x = self.pool5(x)
-		# x = x.view(-1).detach().numpy()
-		# w = self.fc1.weight.data.numpy().transpose()
-		# fblk = FCBlock('normal', device_num, 7)
-		# fblk.append_layer(w)
-		# x = fblk.process(x)
+		x = self.pool5(x)
+		x = x.view(-1).detach().numpy()
+		w = self.fc1.weight.data.numpy().transpose()
+		fblk = FCBlock('normal', device_num, 7)
+		fblk.set_input_size(7.0)
+		fblk.append_layer(w)
+		x = fblk.process(x)
 		return x
 
 	def b3_forward(self, x, device_num):
@@ -205,4 +205,3 @@ y6 = net.b3_forward(y, 5)
 y7 = net.b3_forward(y, 6)
 
 y = y1 + y2 + y3 + y4 + y5 + y6 + y7 + net.fc3.bias.detach().numpy()
-print(y[:50])

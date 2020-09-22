@@ -54,6 +54,7 @@ class Net(nn.Module):
 		x = x.view(-1).detach().numpy()
 		w = self.fc1.weight.data.numpy().transpose()
 		fblk = FCBlock('normal', device_num, 2)
+		fblk.set_input_size(6.0)
 		fblk.append_layer(w)
 		x = fblk.process(x)
 		return x
@@ -80,10 +81,7 @@ class Net(nn.Module):
 		return x
 
 net = Net()
-# torch.save(net.state_dict(), 'models/alexnet')
 net.load_state_dict(torch.load('models/alexnet'))
-# y = net(torch.ones(1, 3, 224, 224))
-# print(y[:50])
 ################# setting ####################
 num_of_devices = 2
 num_of_blocks = 5

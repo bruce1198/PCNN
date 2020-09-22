@@ -24,6 +24,9 @@ class FCBlock:
 
     def get_weights(self):
         return self.w
+    
+    def set_input_size(self, input_size):
+        self.input_size = input_size
 
     def process(self, X):
         if self.mode == 'normal':
@@ -33,7 +36,7 @@ class FCBlock:
             else:
                 size = self.layers[0].shape[0]
                 size2 = self.layers[0].shape[1]
-                input_size = 7
+                input_size = int(self.input_size)
                 avg = int(math.floor(input_size/self.device_num))
                 total = avg
                 mod = input_size % self.device_num
@@ -52,7 +55,8 @@ class FCBlock:
                 height1 = int(size * height / input_size)
                 w = np.float32(np.zeros(shape=(height1, size2)))
                 cnt = 0
-                for i in range(start, size, stride):
+                # print(start)
+                for i in range(start*input_size, size, stride):
                     pos = cnt * height*input_size
                     w[pos:pos+height*input_size, :] = self.layers[0][i:i+height*input_size, :]
                     # print('w['+str(pos)+':'+str(pos+height*input_size)+'] = layer['+str(i)+':'+str(i+height*input_size)+']')
