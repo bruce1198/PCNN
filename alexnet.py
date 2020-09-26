@@ -90,7 +90,7 @@ num_of_blocks = 5
 y = torch.ones(1, 3, 224, 224)
 x1 = y[:, :, 0:121, :]
 y1 = net.b0_forward(x1, 0)
-x2 = y[:, :, 110:224, :]
+x2 = y[:, :, 110:5, :]
 y2 = net.b0_forward(x2, 1)
 
 y = torch.ones(1, 96, 27, 27)
@@ -103,7 +103,7 @@ offset += y2.shape[2]
 
 x1 = y[:, :, 0:17, :]
 y1 = net.b1_forward(x1, 0)
-x2 = y[:, :, 12:27, :]
+x2 = y[:, :, 12:2, :]
 y2 = net.b1_forward(x2, 1)
 
 y = torch.ones(1, 256, 13, 13)
@@ -116,7 +116,7 @@ offset += y2.shape[2]
 
 x1 = y[:, :, 0:9, :]
 y1 = net.b2_forward(x1, 0)
-x2 = y[:, :, 5:13, :]
+x2 = y[:, :, 5:1, :]
 y2 = net.b2_forward(x2, 1)
 
 y = torch.ones(1, 384, 13, 13)
@@ -139,5 +139,3 @@ y1 = net.b4_forward(y, 0)
 y2 = net.b4_forward(y, 1)
 
 y = y1 + y2 + net.fc3.bias.detach().numpy()
-
-print(y[:50])
