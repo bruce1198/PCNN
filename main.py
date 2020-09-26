@@ -5,11 +5,13 @@ from config import *
 import xlwt
 from mls import Prefetcher
 import os
+from pathlib import Path
 
+path = str(Path(__file__).parent.absolute())
 if not os.path.exists('data'):
     os.mkdir('data')
 
-data = xlrd.open_workbook('DL_config.xlsx')
+data = xlrd.open_workbook(path+'/DL_config.xlsx')
 
 sheets = data.sheets()
 # sheet1 = data.sheets()[2]          #通过索引顺序获取
@@ -915,7 +917,7 @@ del data
 
 
 for model in range(0, model_length):
-    filename = 'data/Model_'+str(model)+'_cost2.xls'
+    filename = path+'/data/Model_'+str(model)+'_cost2.xls'
     book = xlwt.Workbook()
     for device in range(1, total_device_num+1):
         sheet1 = book.add_sheet('Device_num_'+str(device))
@@ -947,7 +949,7 @@ device_slice = [[[[] for m in range(maximum_row_num+1)]
 prefetchers = []
 # MLS_DP
 for model in range(model_length):
-    filename = 'data/Second_'+str(model)+'_cost2.xls'
+    filename = path+'/data/Second_'+str(model)+'_cost2.xls'
     book = xlwt.Workbook()
     sheet1 = book.add_sheet('second_dynamic')
     prefetcher = Prefetcher(str(model))
@@ -1055,11 +1057,11 @@ for model in range(model_length):
 
 for idx, prefetcher in enumerate(prefetchers):
     prefetcher.prefetch()
-    with open('data/prefetch'+str(idx)+'.json', 'w') as f:
+    with open(path+'/data/prefetch'+str(idx)+'.json', 'w') as f:
         f.write(prefetcher.jsonify())
 
 """execel for python plotlib"""
-filename = 'data/Plot.xls'
+filename = path+'/data/Plot.xls'
 book = xlwt.Workbook()
 for model in range(model_length):
     sheet1 = book.add_sheet(model_name[model])
@@ -1097,7 +1099,7 @@ book.save(filename)
 
 
 """execel for python plotlib"""
-filename = 'data/time.xls'
+filename = path+'/data/time.xls'
 book = xlwt.Workbook()
 for model in range(model_length):
     sheet1 = book.add_sheet(model_name[model])
