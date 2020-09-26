@@ -56,11 +56,44 @@ try:
                     f.write('\t\tself.device_num = device_num\n')
                     begin = int(key.split(',')[0])
                     end = int(key.split(',')[1])
+                    layer_idx_in_block = 0
                     hybrid = False
                     for i in range(begin, end+1):
                         if data['layers'][i] == 'conv':
-                            f.write('\t\tx = self.pad(x, padding_value='+str(int(data['padding'][i]))+')\n')
+#################################################################### TODO ##############################################################################
+                            padding_top = []
+                            padding_bottom = []
+                            for device_idx in range(total_device_num):
+                                begin_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][0]
+                                end_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][1]
+                                if begin_idx_in_layer < 0:
+                                    padding_top.append(device_idx)
+                                elif end_idx_in_layer >= data['input'][i]:
+                                    padding_bottom.append(device_idx)
+                            print(i, padding_top)
+                            # top padding
+                            f.write('\t\tif device_num == ')
+                            for x in range(len(padding_top)):
+                                if x == len(padding_top) - 1:
+                                    f.write(str(padding_top[x])+':\n')
+                                else:
+                                    f.write(str(padding_top[x]) + ' or device_num == ')
+                            f.write('\t\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', '+str(1)+', 0), 0)\n')
+                            # bottom padding
+                            f.write('\t\telif device_num == ')
+                            for x in range(len(padding_bottom)):
+                                if x == len(padding_bottom) - 1:
+                                    f.write(str(padding_bottom[x])+':\n')
+                                else:
+                                    f.write(str(padding_bottom[x]) + ' or device_num == ')
+                            f.write('\t\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', 0, '+str(1)+'), 0)\n')
+                            # else
+                            f.write('\t\telse:\n')
+                            f.write('\t\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', 0, 0), 0)\n')
+                            # f.write('\t\tx = self.pad(x, padding_value='+str(int(data['padding'][i]))+')\n')
+                            f.write('\t\tx = m(x)\n')
                             f.write('\t\tx = F.relu(self.conv'+str(conv_idx)+'(x))\n')
+#################################################################### TODO ##############################################################################
                             conv_idx += 1
                         elif data['layers'][i] == 'pool':
                             f.write('\t\tx = self.pool'+str(pool_idx)+'(x)\n')
@@ -91,19 +124,20 @@ try:
                                 f.write('\t\tx = fblk.process(x)\n')
                             # f.write('\t\tself.fc'+str(fc_idx)+' = nn.Linear('+str(int(data['in_channel'][idx]))+', '+str(int(data['out_channel'][idx]))+')\n')
                             fc_idx += 1
+                        layer_idx_in_block += 1
                     f.write('\t\treturn x\n')
                     f.write('\n')
                 
-                # padding function
-                f.write('\tdef pad(self, x, padding_value):\n')
-                f.write('\t\tif self.device_num == 0:\n')
-                f.write('\t\t\tm = nn.ConstantPad2d((padding_value, padding_value, padding_value, 0), 0)\n')
-                f.write('\t\telif self.device_num == '+str(total_device_num - 1)+':\n')
-                f.write('\t\t\tm = nn.ConstantPad2d((padding_value, padding_value, 0, padding_value), 0)\n')
-                f.write('\t\telse:\n')
-                f.write('\t\t\tm = nn.ConstantPad2d((padding_value, padding_value, 0, 0), 0)\n')
-                f.write('\t\tx = m(x)\n')
-                f.write('\t\treturn x\n\n')
+                # # padding function
+                # f.write('\tdef pad(self, x, padding_value):\n')
+                # f.write('\t\tif self.device_num == 0:\n')
+                # f.write('\t\t\tm = nn.ConstantPad2d((padding_value, padding_value, padding_value, 0), 0)\n')
+                # f.write('\t\telif self.device_num == '+str(total_device_num - 1)+':\n')
+                # f.write('\t\t\tm = nn.ConstantPad2d((padding_value, padding_value, 0, padding_value), 0)\n')
+                # f.write('\t\telse:\n')
+                # f.write('\t\t\tm = nn.ConstantPad2d((padding_value, padding_value, 0, 0), 0)\n')
+                # f.write('\t\tx = m(x)\n')
+                # f.write('\t\treturn x\n\n')
 
                 ##################### main ######################
                 f.write('net = Net()\n')
@@ -214,11 +248,22 @@ for model in range(4):
             fc_idx   = 1
             for idx, key in enumerate(device.keys()):
                 f.write('\tdef b'+str(idx)+'_forward(self, x):\n')
+                layer_idx_in_block = 0
+                
+                begin_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][0]
+                end_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][1]
                 begin = int(key.split(',')[0])
                 end = int(key.split(',')[1])
                 for i in range(begin, end+1):
                     if data['layers'][i] == 'conv':
-                        f.write('\t\tx = self.pad(x, padding_value='+str(int(data['padding'][i]))+')\n')
+                        if begin_idx_in_layer < 0:
+                            f.write('\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', '+str(int(abs(begin_idx_in_layer)))+', 0), 0)\n')
+                        elif end_idx_in_layer >= data['input'][i]:
+                            f.write('\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', 0, '+str(int(end_idx_in_layer - data['input'][i] + 1))+'), 0)\n')
+                        else:
+                            f.write('\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', 0, 0), 0)\n')
+                        # f.write('\t\tx = self.pad(x, padding_value='+str(int(data['padding'][i]))+')\n')
+                        f.write('\t\tx = m(x)\n')
                         f.write('\t\tx = F.relu(self.conv'+str(conv_idx)+'(x))\n')
                         conv_idx += 1
                     elif data['layers'][i] == 'pool':
@@ -227,21 +272,22 @@ for model in range(4):
                     elif data['layers'][i] == 'FL':
                         # f.write('\t\tself.fc'+str(fc_idx)+' = nn.Linear('+str(int(data['in_channel'][idx]))+', '+str(int(data['out_channel'][idx]))+')\n')
                         fc_idx += 1
+                    layer_idx_in_block
                 f.write('\t\treturn x\n')
                 f.write('\n')
             
-            # padding function
-            f.write('\tdef pad(self, x, padding_value):\n')
-            if device_idx == 0:
-                f.write('\t\tm = nn.ConstantPad2d((padding_value, padding_value, padding_value, 0), 0)\n')
-                f.write('\t\tx = m(x)\n')
-            elif device_idx == total_device_num - 1:
-                f.write('\t\tm = nn.ConstantPad2d((padding_value, padding_value, 0, padding_value), 0)\n')
-                f.write('\t\tx = m(x)\n')
-            else:
-                f.write('\t\tm = nn.ConstantPad2d((padding_value, padding_value, 0, 0), 0)\n')
-                f.write('\t\tx = m(x)\n')
-            f.write('\t\treturn x\n\n')
+            # # padding function
+            # f.write('\tdef pad(self, x, padding_value):\n')
+            # if device_idx == 0:
+            #     f.write('\t\tm = nn.ConstantPad2d((padding_value, padding_value, padding_value, 0), 0)\n')
+            #     f.write('\t\tx = m(x)\n')
+            # elif device_idx == total_device_num - 1:
+            #     f.write('\t\tm = nn.ConstantPad2d((padding_value, padding_value, 0, padding_value), 0)\n')
+            #     f.write('\t\tx = m(x)\n')
+            # else:
+            #     f.write('\t\tm = nn.ConstantPad2d((padding_value, padding_value, 0, 0), 0)\n')
+            #     f.write('\t\tx = m(x)\n')
+            # f.write('\t\treturn x\n\n')
 
             ##################### main ######################
             f.write('net = Net()\n')

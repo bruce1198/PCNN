@@ -36,43 +36,121 @@ class Net(nn.Module):
 
 	def b0_forward(self, x, device_num):
 		self.device_num = device_num
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv1(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv2(x))
 		x = self.pool1(x)
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv3(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv4(x))
 		x = self.pool2(x)
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv5(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv6(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv7(x))
 		x = self.pool3(x)
 		return x
 
 	def b1_forward(self, x, device_num):
 		self.device_num = device_num
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv8(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv9(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv10(x))
 		x = self.pool4(x)
 		return x
 
 	def b2_forward(self, x, device_num):
 		self.device_num = device_num
-		x = self.pad(x, padding_value=1)
+		if device_num == 0 or device_num == 1:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 5 or device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv11(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv12(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 6:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv13(x))
 		x = self.pool5(x)
 		x = x.view(-1).detach().numpy()
@@ -92,16 +170,6 @@ class Net(nn.Module):
 		fblk.append_layer(w1)
 		fblk.append_layer(w2)
 		x = fblk.process(x)
-		return x
-
-	def pad(self, x, padding_value):
-		if self.device_num == 0:
-			m = nn.ConstantPad2d((padding_value, padding_value, padding_value, 0), 0)
-		elif self.device_num == 6:
-			m = nn.ConstantPad2d((padding_value, padding_value, 0, padding_value), 0)
-		else:
-			m = nn.ConstantPad2d((padding_value, padding_value, 0, 0), 0)
-		x = m(x)
 		return x
 
 net = Net()
@@ -180,8 +248,7 @@ offset += y7.shape[2]
 
 x1 = y[:, :, 0:5, :]
 y1 = net.b2_forward(x1, 0)
-x2 = torch.zeros(1, 512, 8, 14)
-x2[:, :, 1:8, :] = y[:, :, 0:7, :]
+x2 = y[:, :, 0:7, :]
 y2 = net.b2_forward(x2, 1)
 x3 = y[:, :, 1:9, :]
 y3 = net.b2_forward(x3, 2)
@@ -189,8 +256,7 @@ x4 = y[:, :, 3:11, :]
 y4 = net.b2_forward(x4, 3)
 x5 = y[:, :, 5:13, :]
 y5 = net.b2_forward(x5, 4)
-x6 = torch.zeros(1, 512, 8, 14)
-x6[:, :, 0:7, :] = y[:, :, 7:14, :]
+x6 = y[:, :, 7:14, :]
 y6 = net.b2_forward(x6, 5)
 x7 = y[:, :, 9:14, :]
 y7 = net.b2_forward(x7, 6)
@@ -207,5 +273,4 @@ y6 = net.b3_forward(y, 5)
 y7 = net.b3_forward(y, 6)
 
 y = y1 + y2 + y3 + y4 + y5 + y6 + y7 + net.fc3.bias.detach().numpy()
-
 print(y[:50])
