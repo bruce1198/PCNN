@@ -36,9 +36,28 @@ class Net(nn.Module):
 		self.conv17 = nn.Conv2d(in_channels=1024, out_channels=512, kernel_size=1, stride=1, padding=0)
 		self.conv18 = nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, stride=1, padding=0)
 		self.conv19 = nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, stride=1, padding=0)
-		self.conv20 = nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, stride=1, padding=0)
+		self.conv20 = nn.Conv2d(in_channels=512, out_channels=64, kernel_size=1, stride=1, padding=0)
 		self.conv21 = nn.Conv2d(in_channels=1280, out_channels=1024, kernel_size=3, stride=1, padding=0)
 		self.conv22 = nn.Conv2d(in_channels=1024, out_channels=425, kernel_size=1, stride=1, padding=0)
+
+	def reorg(self, x, num):
+		# reorg => 38 * 38 * 64 => 19 * 19 * 256
+		b, c, h, w = x.size()
+		x = x.view(b, c, int(h/num), num, int(w/num), num).transpose(3,4).contiguous()
+		x = x.view(b, c, int(h/num*w/num), num*num).transpose(2,3).contiguous()
+		x = x.view(b, c, num*num, int(h/num), int(w/num)).transpose(1,2).contiguous()
+		x = x.view(b, num*num*c, int(h/num), int(w/num))
+		return x
+
+	def concat(self, x1, x2):
+		print(x1.shape)
+		print(x2.shape)
+		x = torch.cat((x1, x2), dim=1)
+		return x
+	
+	def exceptEvery(nth, x):
+		m = x.size(0)
+		return torch.cat((x[:m].reshape(-1,nth)[:,:nth-1].reshape(-1), x[m:m+nth-1]))
 
 	def b0_forward(self, x, device_num):
 		self.device_num = device_num
@@ -84,6 +103,7 @@ class Net(nn.Module):
 		x = F.relu(self.conv12(x))
 		x = self.pad(x, padding_value=1)
 		x = F.relu(self.conv13(x))
+		self.route16 = x
 		x = self.pool5(x)
 		return x
 
@@ -109,8 +129,15 @@ class Net(nn.Module):
 		x = F.relu(self.conv18(x))
 		x = self.pad(x, padding_value=1)
 		x = F.relu(self.conv19(x))
-		x = self.pad(x, padding_value=1)
+		self.route24 = x
+		print(x.shape)
+		x = self.route16
+		x = self.pad(x, padding_value=0)
 		x = F.relu(self.conv20(x))
+		print(x.shape)
+		x = self.reorg(x, 2)
+		self.route24 = 
+		x = self.concat(x, self.route24)
 		x = self.pad(x, padding_value=1)
 		x = F.relu(self.conv21(x))
 		x = self.pad(x, padding_value=0)
