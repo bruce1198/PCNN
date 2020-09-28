@@ -54,7 +54,7 @@ class Net(nn.Module):
 		self.fc3 = nn.Linear(4096, 1000)
 
 net = Net()
-net.load_state_dict(torch.load(pcnn_path+'/models/alexnet'))
+net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
 
 def recvall(sock):
     # Read message length and unpack it into an integer

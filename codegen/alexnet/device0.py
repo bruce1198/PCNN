@@ -76,7 +76,7 @@ class Net(nn.Module):
 		return x
 
 net = Net()
-net.load_state_dict(torch.load(path+'/models/alexnet'))
+net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet')))
 
 
 import socket
