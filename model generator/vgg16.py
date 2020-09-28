@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import sys
 
 class Net(nn.Module):
 	def __init__(self):
@@ -53,7 +54,10 @@ class Net(nn.Module):
 		return x
 
 net = Net()
-# torch.save(net.state_dict(), 'models/vgg16')
+if len(sys.argv) == 2:
+    if sys.argv[1] == '-g':
+        torch.save(net.state_dict(), 'models/vgg16')
+        exit(0)
 net.load_state_dict(torch.load('models/vgg16'))
 y = net(torch.ones(1, 3, 224, 224))
 print(y.view(-1).detach().numpy()[:50])

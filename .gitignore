@@ -1,7 +1,4 @@
-data/
 models/
-codegen/
-codegen/*
 node_modules/
 .DS_Store
 .vscode
