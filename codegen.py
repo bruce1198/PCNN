@@ -160,9 +160,24 @@ try:
                         for idx, device in enumerate(data['devices']):
                             f.write('y'+str(idx+1)+' = net.b'+str(block_idx)+'_forward(y, '+str(idx)+')\n')
                     else:
+                        max = -1
                         for idx, device in enumerate(data['devices']):
                             start = device[key][0]
                             end = device[key][1]
+                            if end - start + 1 > max:
+                                max = end - start + 1
+                        for idx, device in enumerate(data['devices']):
+                            start = device[key][0]
+                            end = device[key][1]
+                            # not the margin devices
+                            # size = data['input'][layer_start]
+                            # if (idx != 0 and idx != len(data['devices'])-1) and (end - start + 1)<max:
+                            #     f.write('x'+str(idx+1)+' = torch.zeros(1, '+str(int(data['in_channel'][layer_start]))+', '+str(max)+', '+str(int(size))+')\n')
+                            #     if start == 0:
+                            #         f.write('x'+str(idx+1)+'[:, :, '+str(max-(end-start))+':'+str(max)+', :] = y[:, :, '+str(start)+':'+str(end+1)+', :]\n')
+                            #     if end == size:
+                            #         f.write('x'+str(idx+1)+'[:, :, '+str(0)+':'+str(end-start)+', :] = y[:, :, '+str(start)+':'+str(end+1)+', :]\n')
+                            # else:
                             f.write('x'+str(idx+1)+' = y[:, :, '+str(start)+':'+str(end+1)+', :]\n')
                             f.write('y'+str(idx+1)+' = net.b'+str(block_idx)+'_forward(x'+str(idx+1)+', '+str(idx)+')\n')
                             # f.write('\n')

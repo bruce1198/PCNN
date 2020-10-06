@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import sys
 
 class Net(nn.Module):
     def __init__(self):
@@ -32,29 +33,13 @@ class Net(nn.Module):
 
 
 
-
 net = Net()
+if len(sys.argv) == 2:
+    if sys.argv[1] == '-g':
+        torch.save(net.state_dict(), 'models/alexnet')
+        exit(0)
 net.load_state_dict(torch.load('models/alexnet'))
-
-# real output
-x = torch.ones(1, 3, 224, 224)
-y = net(x)
-
+y = net(torch.ones(1, 3, 224, 224))
 print(y.view(-1).detach().numpy()[:50])
-# print(type(y.detach().numpy()[0][0]))
-
-
-# import xlwt
-# import numpy as np
-# # real output
-# wb = xlwt.Workbook()
-
-# sh = wb.add_sheet('output')
-# y = y.detach().numpy()
-# # print(y)
-# for i in range(50):
-#     sh.write(i, 0, float(y[0][i]))
-
-# wb.save('correct_output.xls')
 
 
