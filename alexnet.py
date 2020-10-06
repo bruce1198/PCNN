@@ -60,10 +60,8 @@ class Net(nn.Module):
 			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv3(x))
-		if device_num == 0:
-			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
-		elif device_num == 1:
-			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		if device_num == 			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		else:
 			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
@@ -159,3 +157,4 @@ y1 = net.b4_forward(y, 0)
 y2 = net.b4_forward(y, 1)
 
 y = y1 + y2 + net.fc3.bias.detach().numpy()
+print(y[:50])

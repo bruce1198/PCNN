@@ -155,10 +155,8 @@ class Net(nn.Module):
 			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv13(x))
-		if device_num == 0:
-			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
-		elif device_num == 6:
-			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		if device_num == 			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		else:
 			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
@@ -337,3 +335,4 @@ y6 = net.b4_forward(y, 5)
 y7 = net.b4_forward(y, 6)
 
 y = y1 + y2 + y3 + y4 + y5 + y6 + y7 + net.fc3.bias.detach().numpy()
+print(y[:50])

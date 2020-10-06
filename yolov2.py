@@ -444,3 +444,5 @@ y[:, :, offset: offset+y5.shape[2], :] = y5
 offset += y5.shape[2]
 y[:, :, offset: offset+y6.shape[2], :] = y6
 offset += y6.shape[2]
+
+print(y[:50])

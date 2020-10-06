@@ -131,9 +131,12 @@ class Prefetcher:
                         e[idx] = end
                         # b[idx] = int(idx*math.ceil(o/device_num))
                         # e[idx] = int(min((idx+1)*math.ceil(o/device_num), o)-1)
-
-                    index[idx][layer-layer1][0] = int(b[idx]*s-p) # begin index
-                    index[idx][layer-layer1][1] = int(max(e[idx]*s-p+fs-1,0)) # end index
+                    if layer == layer2:
+                        index[idx][layer-layer1][0] = b[idx]
+                        index[idx][layer-layer1][1] = e[idx]
+                    else:
+                        index[idx][layer-layer1][0] = int(b[idx]*s-p) # begin index
+                        index[idx][layer-layer1][1] = int(max(e[idx]*s-p+fs-1,0)) # end index
                     
                     b[idx] = int(max(b[idx]*s-p, 0))
                     e[idx] = int(min(max(e[idx]*s-p+fs-1,0), i-1))

@@ -70,7 +70,7 @@ try:
                                     padding_top.append(device_idx)
                                 elif end_idx_in_layer >= data['input'][i]:
                                     padding_bottom.append(device_idx)
-                            print(i, padding_top)
+                            # print(i, padding_top)
                             # top padding
                             f.write('\t\tif device_num == ')
                             for x in range(len(padding_top)):
@@ -183,6 +183,7 @@ try:
                         for idx in range(len(data['devices'])):
                             f.write('y[:, :, offset: offset+y'+str(idx+1)+'.shape[2], :] = y'+str(idx+1)+'\n')
                             f.write('offset += y'+str(idx+1)+'.shape[2]\n')
+                f.write('\nprint(y[:50])\n')
             f.close()
         sys.exit(0)
 
