@@ -22,21 +22,18 @@ pcnn_path = str(Path(__file__).parent.parent.parent.absolute())
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
-image = image.resize((224, 224), Image.ANTIALIAS )
+image = image.resize((224, 224), Image.ANTIALIAS)
 # convert image to numpy array
 x = np.array([np.asarray(image)[:, :, :3]])
 x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
-# x = np.array([np.arange(224*224*3).reshape(224, 224, 3)])
-# x = torch.ones(1, 3, 224, 224)
-# print(x.view(-1).detach().numpy()[:50])
-# print(x.shape)
+
 
 y = None
 cnt = 0
 offset = 0
 
 def relu(x):
-    	return np.maximum(x, 0)
+    return np.maximum(x, 0)
 
 class Net(nn.Module):
 	def __init__(self):
@@ -63,7 +60,6 @@ def recvall(sock):
         return None
     msglen = struct.unpack('>I', raw_msglen)[0]
     # Read the message data
-    # print(msglen)
     return recv(sock, msglen)
 
 def recv(sock, n):
