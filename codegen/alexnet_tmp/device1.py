@@ -106,7 +106,7 @@ net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet_tmp')))
 
 import socket
 
-socket.socket()
+s = socket.socket()
 host = sys.argv[1]
 port = int(sys.argv[2])
 print(host, port)
@@ -117,10 +117,10 @@ for i in range(6):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
-		'id': 0,
+		'id': 1,
 		'data': x
 	}))
-	if i != 5
+	if i != 5:
 		try:
 			bytes = recvall(s)
 			if bytes is None:
@@ -132,16 +132,16 @@ for i in range(6):
 		if key == 'data':
 			x = data[key]
 			print(x.shape)
-			if i == 0
-				x = net.b0_forward
-			elif i == 1
-				x = net.b1_forward
-			elif i == 2
-				x = net.b2_forward
-			elif i == 3
-				x = net.b3_forward
-			elif i == 4
-				x = net.b4_forward
-			print(x.shape)
+			if i == 0:
+				x = net.b0_forward(x)
+			elif i == 1:
+				x = net.b1_forward(x)
+			elif i == 2:
+				x = net.b2_forward(x)
+			elif i == 3:
+				x = net.b3_forward(x)
+			elif i == 4:
+				x = net.b4_forward(x)
+			# print(x.shape)
 			# do calculate
 s.close()

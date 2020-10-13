@@ -24,7 +24,7 @@ def write_header():
     f.write('from pathlib import Path\n\n')
     
 def write_relu():
-    f.write('def relu(x)\n')
+    f.write('def relu(x):\n')
     f.write('\treturn np.maximum(x, 0)\n\n')
 
 def write_net():
@@ -118,7 +118,7 @@ def write_job():
             f.write('\t\t\t\tif block_id == %d:\n' % (block_idx))
         else:
             f.write('\t\t\t\telif block_id == %d:\n' % (block_idx))
-        f.write('\t\t\t\t\tif cnt == 1\n')
+        f.write('\t\t\t\t\tif cnt == 1:\n')
         if data['layers'][end] == 'conv' or data['layers'][end] == 'pool':
             f.write('\t\t\t\t\t\tx = torch.ones(1, %d, %d, %d)\n' % (data['out_channel'][end], data['output'][end], data['output'][end]))
         elif data['layers'][end] == 'FL':
@@ -126,9 +126,9 @@ def write_job():
         if data['layers'][end] == 'conv' or data['layers'][end] == 'pool':
             for device_idx in range(total_device_num):
                 if device_idx == 0:
-                    f.write('\t\t\t\t\tif idx == %d\n' % (device_idx))
+                    f.write('\t\t\t\t\tif idx == %d:\n' % (device_idx))
                 else:
-                    f.write('\t\t\t\t\telif idx == %d\n' % (device_idx))
+                    f.write('\t\t\t\t\telif idx == %d:\n' % (device_idx))
                 number_of_layer_in_block = len(data['padding_info'][device_idx][layer_key[block_idx-1]])
                 f.write('\t\t\t\t\t\tx[:, :, %d:%d, :] = data_from_device\n' 
                         %(data['padding_info'][device_idx][layer_key[block_idx-1]][number_of_layer_in_block-1][0], data['padding_info'][device_idx][layer_key[block_idx-1]][number_of_layer_in_block-1][1]+1))
@@ -248,7 +248,7 @@ for model in range(4):
         f.write('x = np.array([np.asarray(image)[:, :, :3]])\n')
         f.write('x = torch.Tensor(list(x)).permute(0, 3, 2, 1)\n\n\n')
         f.write('y = None\n')
-        f.write('count = 0\n')
+        f.write('cnt = 0\n')
         f.write('offset = 0\n\n')
 
         write_relu()

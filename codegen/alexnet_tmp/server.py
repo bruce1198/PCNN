@@ -29,10 +29,10 @@ x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
 
 
 y = None
-count = 0
+cnt = 0
 offset = 0
 
-def relu(x)
+def relu(x):
 	return np.maximum(x, 0)
 
 class Net(nn.Module):
@@ -102,32 +102,32 @@ def job(conn, condition):
 			if data_from_device is not None:
 				# print(data_from_device.shape)
 				if block_id == 1:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 96, 27, 27)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:14, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 14:27, :] = data_from_device
 				elif block_id == 2:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 256, 13, 13)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:7, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 7:13, :] = data_from_device
 				elif block_id == 3:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 384, 13, 13)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:7, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 7:13, :] = data_from_device
 				elif block_id == 4:
-					if cnt == 1
+					if cnt == 1:
 						x = np.zeros(4096)
 					x += data_from_device
 				elif block_id == 5:
-					if cnt == 1
+					if cnt == 1:
 						x = np.zeros(1000)
 					x += data_from_device
 			if cnt < device_num:

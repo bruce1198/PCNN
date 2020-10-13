@@ -29,10 +29,10 @@ x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
 
 
 y = None
-count = 0
+cnt = 0
 offset = 0
 
-def relu(x)
+def relu(x):
 	return np.maximum(x, 0)
 
 class Net(nn.Module):
@@ -118,109 +118,109 @@ def job(conn, condition):
 			if data_from_device is not None:
 				# print(data_from_device.shape)
 				if block_id == 1:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 128, 76, 76)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:13, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 13:26, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 26:39, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 39:52, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 52:64, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 64:76, :] = data_from_device
 				elif block_id == 2:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 256, 38, 38)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:7, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 7:14, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 14:20, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 20:26, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 26:32, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 32:38, :] = data_from_device
 				elif block_id == 3:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 256, 38, 38)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:7, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 7:14, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 14:20, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 20:26, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 26:32, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 32:38, :] = data_from_device
 				elif block_id == 4:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 512, 19, 19)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:4, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 4:7, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 7:10, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 10:13, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 13:16, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 16:19, :] = data_from_device
 				elif block_id == 5:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 512, 19, 19)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:4, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 4:7, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 7:10, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 10:13, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 13:16, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 16:19, :] = data_from_device
 				elif block_id == 6:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 512, 19, 19)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:4, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 4:7, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 7:10, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 10:13, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 13:16, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 16:19, :] = data_from_device
 				elif block_id == 7:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 425, 19, 19)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:4, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 4:7, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 7:10, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 10:13, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 13:16, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 16:19, :] = data_from_device
 			if cnt < device_num:
 				condition.wait()

@@ -29,10 +29,10 @@ x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
 
 
 y = None
-count = 0
+cnt = 0
 offset = 0
 
-def relu(x)
+def relu(x):
 	return np.maximum(x, 0)
 
 class Net(nn.Module):
@@ -115,62 +115,62 @@ def job(conn, condition):
 			if data_from_device is not None:
 				# print(data_from_device.shape)
 				if block_id == 1:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 256, 28, 28)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:4, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 4:8, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 8:12, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 12:16, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 16:20, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 20:24, :] = data_from_device
-					elif idx == 6
+					elif idx == 6:
 						x[:, :, 24:28, :] = data_from_device
 				elif block_id == 2:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 512, 14, 14)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:2, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 2:4, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 4:6, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 6:8, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 8:10, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 10:12, :] = data_from_device
-					elif idx == 6
+					elif idx == 6:
 						x[:, :, 12:14, :] = data_from_device
 				elif block_id == 3:
-					if cnt == 1
+					if cnt == 1:
 						x = torch.ones(1, 512, 14, 14)
-					if idx == 0
+					if idx == 0:
 						x[:, :, 0:2, :] = data_from_device
-					elif idx == 1
+					elif idx == 1:
 						x[:, :, 2:4, :] = data_from_device
-					elif idx == 2
+					elif idx == 2:
 						x[:, :, 4:6, :] = data_from_device
-					elif idx == 3
+					elif idx == 3:
 						x[:, :, 6:8, :] = data_from_device
-					elif idx == 4
+					elif idx == 4:
 						x[:, :, 8:10, :] = data_from_device
-					elif idx == 5
+					elif idx == 5:
 						x[:, :, 10:12, :] = data_from_device
-					elif idx == 6
+					elif idx == 6:
 						x[:, :, 12:14, :] = data_from_device
 				elif block_id == 4:
-					if cnt == 1
+					if cnt == 1:
 						x = np.zeros(4096)
 					x += data_from_device
 				elif block_id == 5:
-					if cnt == 1
+					if cnt == 1:
 						x = np.zeros(1000)
 					x += data_from_device
 			if cnt < device_num:

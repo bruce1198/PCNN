@@ -36,9 +36,9 @@ class Net(nn.Module):
 net = Net()
 if len(sys.argv) == 2:
     if sys.argv[1] == '-g':
-        torch.save(net.state_dict(), 'models/alexnet')
+        torch.save(net.state_dict(), '../models/alexnet')
         exit(0)
-net.load_state_dict(torch.load('models/alexnet'))
+net.load_state_dict(torch.load('../models/alexnet'))
 y = net(torch.ones(1, 3, 224, 224))
 print(y.view(-1).detach().numpy()[:50])
 
