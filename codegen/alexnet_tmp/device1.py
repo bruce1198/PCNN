@@ -101,7 +101,7 @@ def recv(sock, n):
 	return data
 
 net = Net()
-net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet_tmp')))
+net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet')))
 
 
 import socket
