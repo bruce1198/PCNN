@@ -104,28 +104,30 @@ def job(conn, condition):
             condition.acquire()
             cnt += 1
             if data_from_device is not None:
-                # print(data_from_device.shape)
+                print(data_from_device.shape)
                 if block_id == 1:
                     if cnt == 1:
                         x = torch.ones(1, 96, 27, 27)
                     if idx == 0:
-                        x[:, :, 0: 14, :] = data_from_device
+                        pass
+                        x[:, :, 12: 14, :] = data_from_device
                     elif idx == 1:
-                        x[:, :, 14: 27, :] = data_from_device
+                        pass
+                        x[:, :, 14: 17, :] = data_from_device
                 elif block_id == 2:
                     if cnt == 1:
                         x = torch.ones(1, 256, 13, 13)
                     if idx == 0:
-                        x[:, :, 0: 7, :] = data_from_device
+                        x[:, :, 5: 7, :] = data_from_device
                     elif idx == 1:
-                        x[:, :, 7: 13, :] = data_from_device
+                        x[:, :, 7: 9, :] = data_from_device
                 elif block_id == 3:
                     if cnt == 1:
                         x = torch.ones(1, 384, 13, 13)
                     if idx == 0:
-                        x[:, :, 0: 7, :] = data_from_device
+                        x[:, :, 5: 7, :] = data_from_device
                     elif idx == 1:
-                        x[:, :, 7: 13, :] = data_from_device
+                        x[:, :, 7: 8, :] = data_from_device
                 elif block_id == 4:
                     if cnt == 1:
                         x = np.zeros(4096)
@@ -150,19 +152,31 @@ def job(conn, condition):
                     y = x[:, :, 110:224, :]
             elif block_id ==1:
                 if idx == 0:
-                    y = x[:, :, 0:17, :]
+                    # x[:, :, 0: 14, :] = data_from_device
+                    # y = x[:, :, 0:17, :]
+                    y = x[:, :, 14:17, :]
                 elif idx == 1:
-                    y = x[:, :, 12:27, :]
+                    # x[:, :, 14: 27, :] = data_from_device
+                    # y = x[:, :, 12:27, :]
+                    y = x[:, :, 12:14, :]
             elif block_id == 2:
                 if idx == 0:
-                    y = x[:, :, 0:9, :]
+                    # x[:, :, 0: 7, :] = data_from_device
+                    # y = x[:, :, 0:9, :]
+                    y = x[:, :, 7:9, :]
                 elif idx == 1:
-                    y = x[:, :, 5:13, :]
+                    # x[:, :, 7: 13, :] = data_from_device
+                    # y = x[:, :, 5:13, :]
+                    y = x[:, :, 5:7, :]
             elif block_id == 3:
                 if idx == 0:
-                    y = x[:, :, 0:8, :]
+                    # x[:, :, 0: 7, :] = data_from_device
+                    # y = x[:, :, 0:8, :]
+                    y = x[:, :, 7:8, :]
                 elif idx == 1:
-                    y = x[:, :, 5:13, :]
+                    # x[:, :, 7: 13, :] = data_from_device
+                    # y = x[:, :, 5:13, :]
+                    y = x[:, :, 5:7, :]
             elif block_id == 4:
                 if idx == 0:
                     y = relu(x + net.fc1.bias.detach().numpy())
