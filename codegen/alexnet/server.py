@@ -17,6 +17,10 @@ import numpy as np
 import threading
 import pickle
 from pathlib import Path
+# estimate
+import time
+load_time = 0
+cal_time = 0
 
 pcnn_path = str(Path(__file__).parent.parent.parent.absolute())
 
@@ -53,8 +57,10 @@ class Net(nn.Module):
 		self.fc2 = nn.Linear(4096, 4096)
 		self.fc3 = nn.Linear(4096, 1000)
 
+start_time = time.time()
 net = Net()
 net.load_state_dict(torch.load(pcnn_path+'/models/alexnet'))
+load_time = time.time() - start_time
 
 def recvall(sock):
     # Read message length and unpack it into an integer
@@ -104,7 +110,7 @@ def job(conn, condition):
             condition.acquire()
             cnt += 1
             if data_from_device is not None:
-                print(data_from_device.shape)
+                # print(data_from_device.shape)
                 if block_id == 1:
                     if cnt == 1:
                         x = torch.ones(1, 96, 27, 27)
@@ -195,6 +201,7 @@ def job(conn, condition):
 def softmax(x):
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
+start_time = time.time()
 with socket(AF_INET, SOCK_STREAM) as s:
     try:
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -215,6 +222,12 @@ with socket(AF_INET, SOCK_STREAM) as s:
         # print(y.view(-1).detach().numpy()[:50])
         y = softmax(y)
         index = np.argmax(y)
-        print(index)
     except error:
         s.close()
+cal_time = time.time() - start_time
+import json
+print(json.dumps({
+    'index': int(index),
+    'load_time': load_time,
+    'cal_time': cal_time
+}))
