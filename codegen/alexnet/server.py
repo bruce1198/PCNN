@@ -39,7 +39,7 @@ y = None
 cnt = 0
 
 def relu(x):
-    	return np.maximum(x, 0)
+    return np.maximum(x, 0)
 
 class Net(nn.Module):
 	def __init__(self):
@@ -95,7 +95,6 @@ def job(conn, condition):
     global device_num
     global comm_time
     while True:
-        tmp_time = time.time()
         try:
             bytes = recvall(conn)
             if bytes is None:
@@ -103,7 +102,6 @@ def job(conn, condition):
         except ConnectionResetError:
             break
         data = pickle.loads(bytes)
-        comm_time += time.time() - tmp_time
         key = data['key']
         block_id = data['blkId']
         idx = data['id']
@@ -195,18 +193,15 @@ def job(conn, condition):
                 y = x + net.fc3.bias.detach().numpy()
                 break
             # print('to', idx, y.shape)
-            tmp_time = time.time()
             sendall(conn, pickle.dumps({
                 'key': 'data',
                 'data': y
             }))
-            comm_time += time.time() - tmp_time
     conn.close()
 
 def softmax(x):
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
-start_time = time.time()
 with socket(AF_INET, SOCK_STREAM) as s:
     try:
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -221,6 +216,7 @@ with socket(AF_INET, SOCK_STREAM) as s:
                 args = (conn, condition)
             )
             t.start()
+        start_time = time.time()
         for i in range(device_num):
             t.join()
         # print(y[:50])
@@ -233,7 +229,6 @@ cal_time = time.time() - start_time
 import json
 print(json.dumps({
     'index': int(index),
-    'load_time': load_time,
-    'cal_time': cal_time,
-    'comm_time': comm_time/device_num,
+    'load_time': int(1000*load_time),
+    'cal_time': int(1000*cal_time)
 }))
