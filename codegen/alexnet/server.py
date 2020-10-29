@@ -37,7 +37,6 @@ x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
 
 y = None
 cnt = 0
-offset = 0
 
 def relu(x):
     	return np.maximum(x, 0)
@@ -86,14 +85,17 @@ def sendall(sock, msg):
     msg = struct.pack('>I', len(msg)) + msg
     sock.sendall(msg)
 
+comm_time = 0
+
 def job(conn, condition):
     # print(conn)
     global cnt
-    global offset
     global x
     global y
     global device_num
+    global comm_time
     while True:
+        tmp_time = time.time()
         try:
             bytes = recvall(conn)
             if bytes is None:
@@ -101,6 +103,7 @@ def job(conn, condition):
         except ConnectionResetError:
             break
         data = pickle.loads(bytes)
+        comm_time += time.time() - tmp_time
         key = data['key']
         block_id = data['blkId']
         idx = data['id']
@@ -113,27 +116,27 @@ def job(conn, condition):
                 # print(data_from_device.shape)
                 if block_id == 1:
                     if cnt == 1:
-                        x = torch.ones(1, 96, 27, 27)
+                        x = torch.ones(1, 96, 5, 27)
                     if idx == 0:
                         pass
-                        x[:, :, 12: 14, :] = data_from_device
+                        x[:, :, 0: 2, :] = data_from_device
                     elif idx == 1:
                         pass
-                        x[:, :, 14: 17, :] = data_from_device
+                        x[:, :, 2: 5, :] = data_from_device
                 elif block_id == 2:
                     if cnt == 1:
-                        x = torch.ones(1, 256, 13, 13)
+                        x = torch.ones(1, 256, 4, 13)
                     if idx == 0:
-                        x[:, :, 5: 7, :] = data_from_device
+                        x[:, :, 0: 2, :] = data_from_device
                     elif idx == 1:
-                        x[:, :, 7: 9, :] = data_from_device
+                        x[:, :, 2: 4, :] = data_from_device
                 elif block_id == 3:
                     if cnt == 1:
-                        x = torch.ones(1, 384, 13, 13)
+                        x = torch.ones(1, 384, 3, 13)
                     if idx == 0:
-                        x[:, :, 5: 7, :] = data_from_device
+                        x[:, :, 0: 2, :] = data_from_device
                     elif idx == 1:
-                        x[:, :, 7: 8, :] = data_from_device
+                        x[:, :, 2: 3, :] = data_from_device
                 elif block_id == 4:
                     if cnt == 1:
                         x = np.zeros(4096)
@@ -160,29 +163,29 @@ def job(conn, condition):
                 if idx == 0:
                     # x[:, :, 0: 14, :] = data_from_device
                     # y = x[:, :, 0:17, :]
-                    y = x[:, :, 14:17, :]
+                    y = x[:, :, 2:5, :]
                 elif idx == 1:
                     # x[:, :, 14: 27, :] = data_from_device
                     # y = x[:, :, 12:27, :]
-                    y = x[:, :, 12:14, :]
+                    y = x[:, :, 0:2, :]
             elif block_id == 2:
                 if idx == 0:
                     # x[:, :, 0: 7, :] = data_from_device
                     # y = x[:, :, 0:9, :]
-                    y = x[:, :, 7:9, :]
+                    y = x[:, :, 2:4, :]
                 elif idx == 1:
                     # x[:, :, 7: 13, :] = data_from_device
                     # y = x[:, :, 5:13, :]
-                    y = x[:, :, 5:7, :]
+                    y = x[:, :, 0:2, :]
             elif block_id == 3:
                 if idx == 0:
                     # x[:, :, 0: 7, :] = data_from_device
                     # y = x[:, :, 0:8, :]
-                    y = x[:, :, 7:8, :]
+                    y = x[:, :, 2:3, :]
                 elif idx == 1:
                     # x[:, :, 7: 13, :] = data_from_device
                     # y = x[:, :, 5:13, :]
-                    y = x[:, :, 5:7, :]
+                    y = x[:, :, 0:2, :]
             elif block_id == 4:
                 if idx == 0:
                     y = relu(x + net.fc1.bias.detach().numpy())
@@ -192,10 +195,12 @@ def job(conn, condition):
                 y = x + net.fc3.bias.detach().numpy()
                 break
             # print('to', idx, y.shape)
+            tmp_time = time.time()
             sendall(conn, pickle.dumps({
                 'key': 'data',
                 'data': y
             }))
+            comm_time += time.time() - tmp_time
     conn.close()
 
 def softmax(x):
@@ -229,5 +234,6 @@ import json
 print(json.dumps({
     'index': int(index),
     'load_time': load_time,
-    'cal_time': cal_time
+    'cal_time': cal_time,
+    'comm_time': comm_time/device_num,
 }))

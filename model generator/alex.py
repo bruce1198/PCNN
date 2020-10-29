@@ -66,7 +66,7 @@ if len(sys.argv) == 2:
 
 start_time = time.time()
 y = net(x)
-y = softmax(y.detach().numpy())
+y = softmax(y.view(-1).detach().numpy())
 index = np.argmax(y)
 # print(y.view(-1).detach().numpy()[:50])
 
