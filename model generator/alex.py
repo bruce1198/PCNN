@@ -1,11 +1,21 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import sys
-import os
+import sys, os
+# works
+from PIL import Image
+import numpy as np
+import pickle
 from pathlib import Path
+# estimate
+import time
+load_time = 0
+cal_time = 0
 
-path = str(Path(__file__).parent.parent.absolute())
+pcnn_path = str(Path(__file__).parent.parent.absolute())
+
+def softmax(x):
+    return np.exp(x) / np.sum(np.exp(x), axis=0)
 
 class Net(nn.Module):
     def __init__(self):
@@ -37,13 +47,35 @@ class Net(nn.Module):
 
 
 
+start_time = time.time()
 net = Net()
+net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
+load_time = time.time() - start_time
+
 if len(sys.argv) == 2:
     if sys.argv[1] == '-g':
-        torch.save(net.state_dict(), 'models/alexnet')
+        torch.save(net.state_dict(), os.path.join(pcnn_path, 'models', 'alexnet'))
         exit(0)
-net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet')))
-y = net(torch.ones(1, 3, 224, 224))
-print(y.view(-1).detach().numpy()[:50])
+    else:
+        image_path = sys.argv[1]
+        image = Image.open(image_path)
+        image = image.resize((224, 224), Image.ANTIALIAS )
+        # convert image to numpy array
+        x = np.array([np.asarray(image)[:, :, :3]])
+        x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
+
+start_time = time.time()
+y = net(x)
+y = softmax(y.detach().numpy())
+index = np.argmax(y)
+# print(y.view(-1).detach().numpy()[:50])
+
+cal_time = time.time() - start_time
+import json
+print(json.dumps({
+    'index': int(index),
+    'load_time': load_time,
+    'cal_time': cal_time
+}))
 
 

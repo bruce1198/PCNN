@@ -113,12 +113,13 @@ def recv(sock, n):
 
 s.connect((host, port))
 x = None
+send_data = None
 for i in range(6):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
 		'id': 0,
-		'data': x
+		'data': send_data
 	}))
 	if i != 5:
 		try:
@@ -130,18 +131,24 @@ for i in range(6):
 		data = pickle.loads(bytes)
 		key = data['key']
 		if key == 'data':
-			x = data[key]
-			print(x.shape)
+			print(data[key].shape)
 			if i == 0:
-				x = net.b0_forward(x)
+				x = net.b0_forward(data[key])
+				send_data = x[:, :, 12:14, :]
 			elif i == 1:
+				x = torch.cat((x, data[key]), dim=2)
 				x = net.b1_forward(x)
+				send_data = x[:, :, 5:7, :]
 			elif i == 2:
+				x = torch.cat((x, data[key]), dim=2)
 				x = net.b2_forward(x)
+				send_data = x[:, :, 5:7, :]
 			elif i == 3:
+				x = torch.cat((x, data[key]), dim=2)
 				x = net.b3_forward(x)
+				send_data = x
 			elif i == 4:
-				x = net.b4_forward(x)
-			print(x.shape)
-			# do calulate
+				x = net.b4_forward(data[key])
+				send_data = x
+			print(send_data.shape)
 s.close()
