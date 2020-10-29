@@ -2,6 +2,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import sys
+import os
+from pathlib import Path
+
+path = str(Path(__file__).parent.parent.absolute())
 
 class Net(nn.Module):
     def __init__(self):
@@ -38,7 +42,7 @@ if len(sys.argv) == 2:
     if sys.argv[1] == '-g':
         torch.save(net.state_dict(), 'models/alexnet')
         exit(0)
-net.load_state_dict(torch.load('models/alexnet'))
+net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet')))
 y = net(torch.ones(1, 3, 224, 224))
 print(y.view(-1).detach().numpy()[:50])
 
