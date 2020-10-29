@@ -17,6 +17,10 @@ import numpy as np
 import threading
 import pickle
 from pathlib import Path
+# estimate
+import time
+load_time = 0
+cal_time = 0
 
 pcnn_path = str(Path(__file__).parent.parent.parent.absolute())
 
@@ -50,8 +54,10 @@ class Net(nn.Module):
 		self.fc2 = nn.Linear(4096, 4096)
 		self.fc3 = nn.Linear(4096, 1000)
 
+start_time = time.time()
 net = Net()
 net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
+load_time = time.time() - start_time
 
 def recvall(sock):
     # Read message length and unpack it into an integer
@@ -105,23 +111,25 @@ def job(conn, condition):
                     if cnt == 1:
                         x = torch.ones(1, 96, 27, 27)
                     if idx == 0:
-                        x[:, :, 0: 14, :] = data_from_device
+                        pass
+                        x[:, :, 12: 14, :] = data_from_device
                     elif idx == 1:
-                        x[:, :, 14: 27, :] = data_from_device
+                        pass
+                        x[:, :, 14: 17, :] = data_from_device
                 elif block_id == 2:
                     if cnt == 1:
                         x = torch.ones(1, 256, 13, 13)
                     if idx == 0:
-                        x[:, :, 0: 7, :] = data_from_device
+                        x[:, :, 5: 7, :] = data_from_device
                     elif idx == 1:
-                        x[:, :, 7: 13, :] = data_from_device
+                        x[:, :, 7: 9, :] = data_from_device
                 elif block_id == 3:
                     if cnt == 1:
                         x = torch.ones(1, 384, 13, 13)
                     if idx == 0:
-                        x[:, :, 0: 7, :] = data_from_device
+                        x[:, :, 5: 7, :] = data_from_device
                     elif idx == 1:
-                        x[:, :, 7: 13, :] = data_from_device
+                        x[:, :, 7: 8, :] = data_from_device
                 elif block_id == 4:
                     if cnt == 1:
                         x = np.zeros(4096)
@@ -146,19 +154,31 @@ def job(conn, condition):
                     y = x[:, :, 110:224, :]
             elif block_id ==1:
                 if idx == 0:
-                    y = x[:, :, 0:17, :]
+                    # x[:, :, 0: 14, :] = data_from_device
+                    # y = x[:, :, 0:17, :]
+                    y = x[:, :, 14:17, :]
                 elif idx == 1:
-                    y = x[:, :, 12:27, :]
+                    # x[:, :, 14: 27, :] = data_from_device
+                    # y = x[:, :, 12:27, :]
+                    y = x[:, :, 12:14, :]
             elif block_id == 2:
                 if idx == 0:
-                    y = x[:, :, 0:9, :]
+                    # x[:, :, 0: 7, :] = data_from_device
+                    # y = x[:, :, 0:9, :]
+                    y = x[:, :, 7:9, :]
                 elif idx == 1:
-                    y = x[:, :, 5:13, :]
+                    # x[:, :, 7: 13, :] = data_from_device
+                    # y = x[:, :, 5:13, :]
+                    y = x[:, :, 5:7, :]
             elif block_id == 3:
                 if idx == 0:
-                    y = x[:, :, 0:8, :]
+                    # x[:, :, 0: 7, :] = data_from_device
+                    # y = x[:, :, 0:8, :]
+                    y = x[:, :, 7:8, :]
                 elif idx == 1:
-                    y = x[:, :, 5:13, :]
+                    # x[:, :, 7: 13, :] = data_from_device
+                    # y = x[:, :, 5:13, :]
+                    y = x[:, :, 5:7, :]
             elif block_id == 4:
                 if idx == 0:
                     y = relu(x + net.fc1.bias.detach().numpy())
@@ -177,6 +197,7 @@ def job(conn, condition):
 def softmax(x):
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
+start_time = time.time()
 with socket(AF_INET, SOCK_STREAM) as s:
     try:
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -197,6 +218,12 @@ with socket(AF_INET, SOCK_STREAM) as s:
         # print(y.view(-1).detach().numpy()[:50])
         y = softmax(y)
         index = np.argmax(y)
-        print(index)
     except error:
         s.close()
+cal_time = time.time() - start_time
+import json
+print(json.dumps({
+    'index': int(index),
+    'load_time': load_time,
+    'cal_time': cal_time
+}))
