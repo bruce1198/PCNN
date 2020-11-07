@@ -6,13 +6,13 @@ import sys, os
 from PIL import Image
 import numpy as np
 import pickle
-from pathlib import Path
+from os.path import abspath, dirname
 # estimate
 import time
 load_time = 0
 cal_time = 0
 
-pcnn_path = str(Path(__file__).parent.parent.absolute())
+pcnn_path = dirname(dirname(abspath(__file__)))
 sys.path.insert(0, pcnn_path)
 from fl import FCBlock
 
