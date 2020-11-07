@@ -22,7 +22,7 @@ import time
 load_time = 0
 cal_time = 0
 
-pcnn_path = dirname(dirname(abspath(__file__)))
+pcnn_path = dirname(dirname(dirname(abspath(__file__))))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
@@ -55,11 +55,6 @@ class Net(nn.Module):
 		self.fc1 = nn.Linear(9216, 4096)
 		self.fc2 = nn.Linear(4096, 4096)
 		self.fc3 = nn.Linear(4096, 1000)
-
-start_time = time.time()
-net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
-load_time = time.time() - start_time
 
 def recvall(sock):
     # Read message length and unpack it into an integer
@@ -116,10 +111,8 @@ def job(conn, condition):
                     if cnt == 1:
                         x = torch.ones(1, 96, 5, 27)
                     if idx == 0:
-                        pass
                         x[:, :, 0: 2, :] = data_from_device
                     elif idx == 1:
-                        pass
                         x[:, :, 2: 5, :] = data_from_device
                 elif block_id == 2:
                     if cnt == 1:
@@ -185,10 +178,7 @@ def job(conn, condition):
                     # y = x[:, :, 5:13, :]
                     y = x[:, :, 0:2, :]
             elif block_id == 4:
-                if idx == 0:
-                    y = relu(x + net.fc1.bias.detach().numpy())
-                elif idx == 1:
-                    y = relu(x + net.fc1.bias.detach().numpy())
+                y = relu(x + net.fc1.bias.detach().numpy())
             elif block_id == 5:
                 y = x + net.fc3.bias.detach().numpy()
                 break
@@ -207,6 +197,10 @@ with socket(AF_INET, SOCK_STREAM) as s:
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
         s.bind((HOST, PORT))
         s.listen()
+        start_time = time.time()
+        net = Net()
+        net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
+        load_time = time.time() - start_time
         condition = threading.Condition()
         for i in range(device_num):
             conn, addr = s.accept()
@@ -219,7 +213,8 @@ with socket(AF_INET, SOCK_STREAM) as s:
         start_time = time.time()
         for i in range(device_num):
             t.join()
-        # print(y[:50])
+        print(y.shape)
+        print(y[:50])
         # print(y.view(-1).detach().numpy()[:50])
         y = softmax(y)
         index = np.argmax(y)

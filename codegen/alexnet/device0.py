@@ -7,7 +7,7 @@ import pickle
 import os, sys, struct
 from os.path import abspath, dirname
 
-path = dirname(dirname(abspath(__file__)))
+path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.insert(0, path)
 from fl import FCBlock
 
@@ -111,16 +111,11 @@ def recv(sock, n):
         data.extend(packet)
     return data
 
-while True:
-	try:
-		s.connect((host, port))
-		break
-	except ConnectionRefusedError:
-		continue
+s.connect((host, port))
 	
 x = None
 send_data = None
-for i in range(6):
+for i in range(5):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
