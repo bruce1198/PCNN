@@ -63,23 +63,22 @@ class Net(nn.Module):
         fblk = FCBlock('normal', 0, 1)
         fblk.set_input_size(6.0)
         fblk.append_layer(w)
-        # x = relu(fblk.process(x) + self.fc1.bias.detach().numpy())
+        x = relu(fblk.process(x) + self.fc1.bias.detach().numpy())
+        w1 = self.fc2.weight.data.numpy().transpose()
+        w2 = self.fc3.weight.data.numpy().transpose()
+        fblk = FCBlock('hybrid', 0, 1)
+        fblk.set_bias(self.fc2.bias.detach().numpy())
+        fblk.append_layer(w1)
+        fblk.append_layer(w2)
         x = fblk.process(x)
-        # w1 = self.fc2.weight.data.numpy().transpose()
-        # w2 = self.fc3.weight.data.numpy().transpose()
-        # fblk = FCBlock('hybrid', 0, 1)
-        # fblk.set_bias(self.fc2.bias.detach().numpy())
-        # fblk.append_layer(w1)
-        # fblk.append_layer(w2)
-        # x = fblk.process(x)
-        # x += self.fc3.bias.detach().numpy()
+        x += self.fc3.bias.detach().numpy()
         return x
 
 
 
 start_time = time.time()
 net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
+net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet.h5')))
 load_time = time.time() - start_time
 
 if len(sys.argv) == 2:
@@ -98,8 +97,8 @@ start_time = time.time()
 # y = net.forward_origin(x)
 # print(y.view(-1).detach().numpy()[:50])
 y = net(x)
-print(y.shape)
-print(y[:50])
+# print(y.shape)
+# print(y[:50])
 y = softmax(y)
 index = np.argmax(y)
 

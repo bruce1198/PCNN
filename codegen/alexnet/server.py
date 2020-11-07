@@ -199,7 +199,7 @@ with socket(AF_INET, SOCK_STREAM) as s:
         s.listen()
         start_time = time.time()
         net = Net()
-        net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
+        net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet.h5')))
         load_time = time.time() - start_time
         condition = threading.Condition()
         for i in range(device_num):
