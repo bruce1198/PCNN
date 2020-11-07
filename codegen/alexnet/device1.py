@@ -5,9 +5,9 @@ import numpy as np
 import json
 import pickle
 import os, sys, struct
-from pathlib import Path
+from os.path import abspath, dirname
 
-path = str(Path(__file__).parent.parent.parent.absolute())
+path = dirname(dirname(abspath(__file__)))
 sys.path.insert(0, path)
 from fl import FCBlock
 

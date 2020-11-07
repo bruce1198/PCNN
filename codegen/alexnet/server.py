@@ -16,13 +16,13 @@ from PIL import Image
 import numpy as np
 import threading
 import pickle
-from pathlib import Path
+from os.path import abspath, dirname
 # estimate
 import time
 load_time = 0
 cal_time = 0
 
-pcnn_path = str(Path(__file__).parent.parent.parent.absolute())
+pcnn_path = dirname(dirname(abspath(__file__)))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
