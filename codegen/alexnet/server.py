@@ -135,6 +135,7 @@ def job(conn, condition):
                 elif block_id == 5:
                     if cnt == 1:
                         x = np.zeros(1000)
+                    print()
                     x += data_from_device
             if cnt < device_num:
                 condition.wait()
@@ -180,6 +181,7 @@ def job(conn, condition):
             elif block_id == 4:
                 y = relu(x + net.fc1.bias.detach().numpy())
             elif block_id == 5:
+                print()
                 y = x + net.fc3.bias.detach().numpy()
                 break
             # print('to', idx, y.shape)

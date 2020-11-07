@@ -136,15 +136,15 @@ for i in range(6):
 				x = net.b0_forward(data[key])
 				send_data = x[:, :, :3, :]
 			elif i == 1:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b1_forward(x)
 				send_data = x[:, :, :2, :]
 			elif i == 2:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b2_forward(x)
 				send_data = x[:, :, :1, :]
 			elif i == 3:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b3_forward(x)
 				send_data = x
 			elif i == 4:
