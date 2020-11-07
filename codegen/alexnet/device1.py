@@ -114,7 +114,7 @@ def recv(sock, n):
 s.connect((host, port))
 x = None
 send_data = None
-for i in range(5):
+for i in range(6):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,

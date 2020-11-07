@@ -213,8 +213,8 @@ with socket(AF_INET, SOCK_STREAM) as s:
         start_time = time.time()
         for i in range(device_num):
             t.join()
-        print(y.shape)
-        print(y[:50])
+        # print(y.shape)
+        # print(y[:50])
         # print(y.view(-1).detach().numpy()[:50])
         y = softmax(y)
         index = np.argmax(y)
