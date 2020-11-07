@@ -168,11 +168,11 @@ for i in range(5):
 				x = net.b0_forward(data[key])
 				send_data = x[:, :, 0:4, :]
 			elif i == 1:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key][:, :, 0:3, :], x, data[key][:, :, 3:6, :]), dim=2) 
 				x = net.b1_forward(data[key])
 				send_data = x[:, :, 0:2, :]
 			elif i == 2:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:5, :]), dim=2) 
 				x = net.b2_forward(data[key])
 				send_data = x
 			elif i == 3:

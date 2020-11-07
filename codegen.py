@@ -129,7 +129,7 @@ def write_main():
     f.write('\t\tif key == \'data\':\n')
     # f.write('\t\t\tx = data[key]\n')
     # f.write('\t\t\tprint(x.shape)\n')
-
+    prev_key = None
     for block_idx, key in enumerate(data['padding_info'][device_idx]):
         if block_idx == 0:
             f.write('\t\t\tif i == %d:\n' % (block_idx))
@@ -137,7 +137,22 @@ def write_main():
             f.write('\t\t\telif i == %d:\n' % (block_idx))
 
         if block_idx != 0 and data['layers'][int(key.split(',')[0])] == 'conv':
-            f.write('\t\t\t\tx = torch.cat((x, data[key]), dim=2)\n')
+            current_begin = data['devices'][device_idx][key][0]
+            current_end = data['devices'][device_idx][key][1]
+            prev_begin = data['padding_info'][device_idx][prev_key][-1][0]
+            prev_end = data['padding_info'][device_idx][prev_key][-1][1]
+
+            if current_begin < prev_begin and current_end > prev_end:
+                f.write('\t\t\t\tx = torch.cat((data[key][:, :, %d:%d, :], x, data[key][:, :, %d:%d, :]), dim=2) \n'% (\
+                    0, prev_begin-current_begin, prev_begin-current_begin, (prev_begin-current_begin) + (current_end-prev_end)
+                    ))
+            elif current_begin < prev_begin:
+                f.write('\t\t\t\tx = torch.cat((data[key], x), dim=2)\n')
+            elif current_end > prev_end:
+                f.write('\t\t\t\tx = torch.cat((x, data[key]), dim=2)\n')
+            # if model == 1:
+            #     print(current_begin, current_end, prev_begin, prev_end)
+
         f.write('\t\t\t\tx = net.b%d_forward(data[key])\n' % (block_idx))
         if block_idx < len(mask_list):
             output_begin_idx_in_block = data['padding_info'][device_idx][key][-1][0]
@@ -164,9 +179,11 @@ def write_main():
             if(model == 1):
                 # print(output_begin_idx_in_block, output_end_idx_in_block)
                 # print(mask_list[block_idx])
-                print(begin_index_list, end_index_list)
+                # print(begin_index_list, end_index_list)
+                pass
         else:
             f.write('\t\t\t\tsend_data = x\n')
+        prev_key = key
         
         
     f.write('\t\t\t# print(x.shape)\n')
@@ -226,8 +243,6 @@ def fastmode_calculation():
                 if current_end < next_end:
                     mask[current_end:next_end+1] = 0
             mask_list.append(mask)
-    if(model == 1):
-        print(len(mask_list))
     return(mask_list)
 
 

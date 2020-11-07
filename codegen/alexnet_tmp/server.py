@@ -16,9 +16,12 @@ from PIL import Image
 import numpy as np
 import threading
 import pickle
-from pathlib import Path
-
-pcnn_path = str(Path(__file__).parent.parent.parent.absolute())
+from os.path import abspath, dirname
+# estimate
+import time
+load_time = 0
+cal_time = 0
+pcnn_path = dirname(dirname(abspath(__file__)))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
@@ -30,7 +33,6 @@ x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
 
 y = None
 cnt = 0
-offset = 0
 
 def relu(x):
 	return np.maximum(x, 0)
@@ -50,8 +52,10 @@ class Net(nn.Module):
 		self.fc2 = nn.Linear(4096, 4096)
 		self.fc3 = nn.Linear(4096, 1000)
 
+start_time = time.time()
 net = Net()
 net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
+load_time = time.time() - start_time
 
 def recvall(sock):
 	# Read message length and unpack it into an integer
@@ -76,13 +80,15 @@ def sendall(sock, msg):
 	msg = struct.pack('>I', len(msg)) + msg
 	sock.sendall(msg)
 
+comm_time = 0
+
 def job(conn, condition):
 	# print(conn)
 	global cnt
-	global offset
 	global x
 	global y
 	global device_num
+	global comm_time
 	while True:
 		try:
 			bytes = recvall(conn)

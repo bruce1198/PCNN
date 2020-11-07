@@ -1,7 +1,7 @@
 import json
 import os
 import sys
-
+import numpy as np
 def write_header():
     f.write('# argv\n')
     f.write('import sys, os, inspect\n')
@@ -21,7 +21,21 @@ def write_header():
     f.write('import numpy as np\n')
     f.write('import threading\n')
     f.write('import pickle\n')
-    f.write('from pathlib import Path\n\n')
+    f.write('from os.path import abspath, dirname\n')
+    f.write('# estimate\n')
+    f.write('import time\n')
+    f.write('load_time = 0\n')
+    f.write('cal_time = 0\n')
+    f.write('pcnn_path = dirname(dirname(abspath(__file__)))\n\n')
+    f.write('image_path = sys.argv[4]\n')
+    f.write('image = Image.open(image_path)\n')
+    f.write('image = image.resize((224, 224), Image.ANTIALIAS)\n')
+    f.write('# convert image to numpy array\n')
+    f.write('x = np.array([np.asarray(image)[:, :, :3]])\n')
+    f.write('x = torch.Tensor(list(x)).permute(0, 3, 2, 1)\n\n\n')
+    f.write('y = None\n')
+    f.write('cnt = 0\n\n')
+
     
 def write_relu():
     f.write('def relu(x):\n')
@@ -77,10 +91,10 @@ def write_job():
     f.write('def job(conn, condition):\n')
     f.write('\t# print(conn)\n')
     f.write('\tglobal cnt\n')
-    f.write('\tglobal offset\n')
     f.write('\tglobal x\n')
     f.write('\tglobal y\n')
     f.write('\tglobal device_num\n')
+    f.write('\tglobal comm_time\n')
     f.write('\twhile True:\n')
     f.write('\t\ttry:\n')
     f.write('\t\t\tbytes = recvall(conn)\n')
@@ -121,9 +135,6 @@ def write_job():
         f.write('\t\t\t\t\tif cnt == 1:\n')
         if data['layers'][end] == 'conv' or data['layers'][end] == 'pool':
             f.write('\t\t\t\t\t\tx = torch.ones(1, %d, %d, %d)\n' % (data['out_channel'][end], data['output'][end], data['output'][end]))
-        elif data['layers'][end] == 'FL':
-            f.write('\t\t\t\t\t\tx = np.zeros(%d)\n' % (data['out_channel'][end]))
-        if data['layers'][end] == 'conv' or data['layers'][end] == 'pool':
             for device_idx in range(total_device_num):
                 if device_idx == 0:
                     f.write('\t\t\t\t\tif idx == %d:\n' % (device_idx))
@@ -133,7 +144,10 @@ def write_job():
                 f.write('\t\t\t\t\t\tx[:, :, %d:%d, :] = data_from_device\n' 
                         %(data['padding_info'][device_idx][layer_key[block_idx-1]][number_of_layer_in_block-1][0], data['padding_info'][device_idx][layer_key[block_idx-1]][number_of_layer_in_block-1][1]+1))
         elif data['layers'][end] == 'FL':
+            f.write('\t\t\t\t\t\tx = np.zeros(%d)\n' % (data['out_channel'][end]))
             f.write('\t\t\t\t\tx += data_from_device\n')
+
+            
     f.write('\t\t\tif cnt < device_num:\n')    
     f.write('\t\t\t\tcondition.wait()\n')  
     f.write('\t\t\tif cnt == device_num:\n')  
@@ -217,8 +231,39 @@ def write_socket():
     f.write('\texcept error:\n')
     f.write('\t\ts.close()\n')
 
+def fastmode_calculation():
+    mask_list = [] # record whether data need to be send
+    key_list = []
+    for index, key in enumerate(data['padding_info'][0]):
+        key_list.append(key)
+    # print(key_list)
+    # print(len(key_list))
+    for key_index in range(len(key_list)-1):
+        end_idx_in_block = int(key_list[key_index].split(',')[1])
+        if data['layers'][end_idx_in_block+1] == 'conv':
+            mask = np.zeros((int(data['output'][end_idx_in_block]))) - 1 # initialized with -1
+            # mask = np.zeros()
+            for device_idx in range(total_device_num):
+                current_key = key_list[key_index]
+                next_key = key_list[key_index+1]
+                # print(device_idx, current_key, data['padding_info'][device_idx][current_key][-1], data['devices'][device_idx][next_key])
+                current_begin = data['padding_info'][device_idx][current_key][-1][0]
+                next_begin = data['devices'][device_idx][next_key][0]
+                if next_begin < current_begin:
+                    mask[next_begin:current_begin+1] = 0
+                current_end = data['padding_info'][device_idx][current_key][-1][1]
+                next_end = data['devices'][device_idx][next_key][1]
+                if current_end < next_end:
+                    mask[current_end:next_end+1] = 0
+            mask_list.append(mask)
+    if(model == 1):
+        print(len(mask_list))
+    return(mask_list)
+
+
 if not os.path.exists('codegen'):
     os.mkdir('codegen')
+
 
 for model in range(4):
     with open('data/prefetch'+str(model)+'.json') as f:
@@ -228,7 +273,7 @@ for model in range(4):
     total_device_num = len(data['devices'])
     total_block_num  = len(data['devices'][0].keys())
     
-
+    mask_list = fastmode_calculation()
     path = {
         0: 'yolov2',
         1: 'alexnet_tmp',
@@ -240,26 +285,20 @@ for model in range(4):
     with open('codegen/'+path+'/server.py', 'w') as f:
         write_header()
 
-        f.write('pcnn_path = str(Path(__file__).parent.parent.parent.absolute())\n\n')
-        f.write('image_path = sys.argv[4]\n')
-        f.write('image = Image.open(image_path)\n')
-        f.write('image = image.resize((224, 224), Image.ANTIALIAS)\n')
-        f.write('# convert image to numpy array\n')
-        f.write('x = np.array([np.asarray(image)[:, :, :3]])\n')
-        f.write('x = torch.Tensor(list(x)).permute(0, 3, 2, 1)\n\n\n')
-        f.write('y = None\n')
-        f.write('cnt = 0\n')
-        f.write('offset = 0\n\n')
-
         write_relu()
         write_net()
 
+        f.write('start_time = time.time()\n')
         f.write('net = Net()\n')
-        f.write('net.load_state_dict(torch.load(os.path.join(pcnn_path, \'models\', \'alexnet\')))\n\n')
+        f.write('net.load_state_dict(torch.load(os.path.join(pcnn_path, \'models\', \'alexnet\')))\n')
+        f.write('load_time = time.time() - start_time\n\n')
 
         write_recvall()
         write_recv()
         write_sendall()
+
+        f.write('comm_time = 0\n\n')
+
         write_job()
         write_softmax()
         write_socket()
