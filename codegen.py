@@ -11,7 +11,7 @@ def write_header():
     f.write('import pickle\n')
     f.write('import os, sys, struct\n')
     f.write('from pathlib import Path\n\n')
-    f.write('path = str(Path(__file__).parent.parent.parent.absolute())\n')
+    f.write('path = dirname(dirname(abspath(__file__)))\n')
     f.write('sys.path.insert(0, path)\n')
     f.write('from fl import FCBlock\n\n')
 
@@ -109,12 +109,13 @@ def write_main():
     f.write('print(host, port)\n\n')
     f.write('s.connect((host, port))\n')
     f.write('x = None\n')
+    f.write('send_data = None\n')
     f.write('for i in range(%d):\n' % (total_block_num+1))
     f.write('\tsendall(s, pickle.dumps({\n')
     f.write('\t\t\'key\': \'get\',\n')
     f.write('\t\t\'blkId\': i,\n')
     f.write('\t\t\'id\': %d,\n' % (device_idx))
-    f.write('\t\t\'data\': x\n')
+    f.write('\t\t\'data\': send_data\n')
     f.write('\t}))\n')
     f.write('\tif i != %d:\n' % (total_block_num))
     f.write('\t\ttry:\n')
@@ -126,15 +127,48 @@ def write_main():
     f.write('\t\tdata = pickle.loads(bytes)\n')
     f.write('\t\tkey = data[\'key\']\n')
     f.write('\t\tif key == \'data\':\n')
-    f.write('\t\t\tx = data[key]\n')
-    f.write('\t\t\tprint(x.shape)\n')
-    for block_idx in range(total_block_num):
+    # f.write('\t\t\tx = data[key]\n')
+    # f.write('\t\t\tprint(x.shape)\n')
+
+    for block_idx, key in enumerate(data['padding_info'][device_idx]):
         if block_idx == 0:
             f.write('\t\t\tif i == %d:\n' % (block_idx))
-            f.write('\t\t\t\tx = net.b%d_forward(x)\n' % (block_idx))
         else :
             f.write('\t\t\telif i == %d:\n' % (block_idx))
-            f.write('\t\t\t\tx = net.b%d_forward(x)\n' % (block_idx))
+
+        if block_idx != 0 and data['layers'][int(key.split(',')[0])] == 'conv':
+            f.write('\t\t\t\tx = torch.cat((x, data[key]), dim=2)\n')
+        f.write('\t\t\t\tx = net.b%d_forward(data[key])\n' % (block_idx))
+        if block_idx < len(mask_list):
+            output_begin_idx_in_block = data['padding_info'][device_idx][key][-1][0]
+            output_end_idx_in_block = data['padding_info'][device_idx][key][-1][1]
+            # print(output_begin_idx_in_block, output_end_idx_in_block)
+            begin_index_list = [] 
+            end_index_list = [] 
+            for iter_ in range(output_begin_idx_in_block, output_end_idx_in_block+1):
+                # data index nedded to be transmitted
+                if(mask_list[block_idx][iter_] != -1 and iter_ == output_begin_idx_in_block) \
+                    or (mask_list[block_idx][iter_-1] == -1 and mask_list[block_idx][iter_] != -1):
+                    begin_index_list.append(iter_)
+                if(mask_list[block_idx][iter_] != -1 and iter_ == output_end_idx_in_block) \
+                    or (iter_ <= output_end_idx_in_block and mask_list[block_idx][iter_] != -1 and mask_list[block_idx][iter_+1] == -1):
+                    end_index_list.append(iter_)
+            if len(begin_index_list) > 1:
+                f.write('\t\t\t\tsend_data = torch.cat((x[:, :, %d:%d, :], x[:, :, %d:%d, :], dim=2))\n' % (\
+                    begin_index_list[0]-output_begin_idx_in_block, end_index_list[0]-output_begin_idx_in_block+1,\
+                    begin_index_list[1]-output_begin_idx_in_block, end_index_list[1]-output_begin_idx_in_block+1\
+                        ))
+            else:
+                f.write('\t\t\t\tsend_data = x[:, :, %d:%d, :]\n' % \
+                    (begin_index_list[0]-output_begin_idx_in_block, end_index_list[0]-output_begin_idx_in_block+1))
+            if(model == 1):
+                # print(output_begin_idx_in_block, output_end_idx_in_block)
+                # print(mask_list[block_idx])
+                print(begin_index_list, end_index_list)
+        else:
+            f.write('\t\t\t\tsend_data = x\n')
+        
+        
     f.write('\t\t\t# print(x.shape)\n')
     f.write('\t\t\t# do calculate\n')
     f.write('s.close()\n')
@@ -167,6 +201,36 @@ def write_recv():
     f.write('\t\tdata.extend(packet)\n')
     f.write('\treturn data\n\n')
 
+def fastmode_calculation():
+    mask_list = [] # record whether data need to be send
+    key_list = []
+    for index, key in enumerate(data['padding_info'][0]):
+        key_list.append(key)
+    # print(key_list)
+    # print(len(key_list))
+    for key_index in range(len(key_list)-1):
+        end_idx_in_block = int(key_list[key_index].split(',')[1])
+        if data['layers'][end_idx_in_block+1] == 'conv':
+            mask = np.zeros((int(data['output'][end_idx_in_block]))) - 1 # initialized with -1
+            # mask = np.zeros()
+            for device_idx in range(total_device_num):
+                current_key = key_list[key_index]
+                next_key = key_list[key_index+1]
+                # print(device_idx, current_key, data['padding_info'][device_idx][current_key][-1], data['devices'][device_idx][next_key])
+                current_begin = data['padding_info'][device_idx][current_key][-1][0]
+                next_begin = data['devices'][device_idx][next_key][0]
+                if next_begin < current_begin:
+                    mask[next_begin:current_begin+1] = 0
+                current_end = data['padding_info'][device_idx][current_key][-1][1]
+                next_end = data['devices'][device_idx][next_key][1]
+                if current_end < next_end:
+                    mask[current_end:next_end+1] = 0
+            mask_list.append(mask)
+    if(model == 1):
+        print(len(mask_list))
+    return(mask_list)
+
+
 if not os.path.exists('codegen'):
     os.mkdir('codegen')
 
@@ -178,6 +242,7 @@ for model in range(4):
     total_device_num = len(data['devices'])
     total_block_num  = len(data['devices'][0].keys())
     
+    mask_list = fastmode_calculation()
     for device_idx, device in enumerate(data['devices']):
         num_of_fc_in_block = np.zeros(total_block_num)
         path = {

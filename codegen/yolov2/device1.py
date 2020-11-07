@@ -7,7 +7,7 @@ import pickle
 import os, sys, struct
 from pathlib import Path
 
-path = str(Path(__file__).parent.parent.parent.absolute())
+path = dirname(dirname(abspath(__file__)))
 sys.path.insert(0, path)
 from fl import FCBlock
 
@@ -174,12 +174,13 @@ print(host, port)
 
 s.connect((host, port))
 x = None
+send_data = None
 for i in range(8):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
 		'id': 1,
-		'data': x
+		'data': send_data
 	}))
 	if i != 7:
 		try:
@@ -191,22 +192,33 @@ for i in range(8):
 		data = pickle.loads(bytes)
 		key = data['key']
 		if key == 'data':
-			x = data[key]
-			print(x.shape)
 			if i == 0:
-				x = net.b0_forward(x)
+				x = net.b0_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:3, :], x[:, :, 12:13, :], dim=2))
 			elif i == 1:
-				x = net.b1_forward(x)
+				x = torch.cat((x, data[key]), dim=2)
+				x = net.b1_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 6:7, :], dim=2))
 			elif i == 2:
-				x = net.b2_forward(x)
+				x = torch.cat((x, data[key]), dim=2)
+				x = net.b2_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:3, :], x[:, :, 5:7, :], dim=2))
 			elif i == 3:
-				x = net.b3_forward(x)
+				x = torch.cat((x, data[key]), dim=2)
+				x = net.b3_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:3, :], dim=2))
 			elif i == 4:
-				x = net.b4_forward(x)
+				x = torch.cat((x, data[key]), dim=2)
+				x = net.b4_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:3, :], dim=2))
 			elif i == 5:
-				x = net.b5_forward(x)
+				x = torch.cat((x, data[key]), dim=2)
+				x = net.b5_forward(data[key])
+				send_data = x[:, :, 0:3, :]
 			elif i == 6:
-				x = net.b6_forward(x)
+				x = torch.cat((x, data[key]), dim=2)
+				x = net.b6_forward(data[key])
+				send_data = x
 			# print(x.shape)
 			# do calculate
 s.close()

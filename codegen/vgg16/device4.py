@@ -7,7 +7,7 @@ import pickle
 import os, sys, struct
 from pathlib import Path
 
-path = str(Path(__file__).parent.parent.parent.absolute())
+path = dirname(dirname(abspath(__file__)))
 sys.path.insert(0, path)
 from fl import FCBlock
 
@@ -146,12 +146,13 @@ print(host, port)
 
 s.connect((host, port))
 x = None
+send_data = None
 for i in range(5):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
 		'id': 4,
-		'data': x
+		'data': send_data
 	}))
 	if i != 4:
 		try:
@@ -163,16 +164,20 @@ for i in range(5):
 		data = pickle.loads(bytes)
 		key = data['key']
 		if key == 'data':
-			x = data[key]
-			print(x.shape)
 			if i == 0:
-				x = net.b0_forward(x)
+				x = net.b0_forward(data[key])
+				send_data = x[:, :, 0:4, :]
 			elif i == 1:
-				x = net.b1_forward(x)
+				x = torch.cat((x, data[key]), dim=2)
+				x = net.b1_forward(data[key])
+				send_data = x[:, :, 0:2, :]
 			elif i == 2:
-				x = net.b2_forward(x)
+				x = torch.cat((x, data[key]), dim=2)
+				x = net.b2_forward(data[key])
+				send_data = x
 			elif i == 3:
-				x = net.b3_forward(x)
+				x = net.b3_forward(data[key])
+				send_data = x
 			# print(x.shape)
 			# do calculate
 s.close()
