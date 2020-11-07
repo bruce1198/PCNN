@@ -5,9 +5,9 @@ import numpy as np
 import json
 import pickle
 import os, sys, struct
-from pathlib import Path
+from os.path import abspath, dirname
 
-path = str(Path(__file__).parent.parent.parent.absolute())
+path = dirname(dirname(abspath(__file__)))
 sys.path.insert(0, path)
 from fl import FCBlock
 
@@ -84,7 +84,7 @@ import socket
 s = socket.socket()
 host = sys.argv[1]
 port = int(sys.argv[2])
-print(host, port)
+# print(host, port)
 
 def sendall(sock, msg):
     # Prefix each message with a 4-byte length (network byte order)
@@ -111,7 +111,13 @@ def recv(sock, n):
         data.extend(packet)
     return data
 
-s.connect((host, port))
+while True:
+	try:
+		s.connect((host, port))
+		break
+	except ConnectionRefusedError:
+		continue
+	
 x = None
 send_data = None
 for i in range(6):
@@ -131,7 +137,7 @@ for i in range(6):
 		data = pickle.loads(bytes)
 		key = data['key']
 		if key == 'data':
-			print(data[key].shape)
+			# print(data[key].shape)
 			if i == 0:
 				x = net.b0_forward(data[key])
 				send_data = x[:, :, 12:14, :]
@@ -150,5 +156,5 @@ for i in range(6):
 			elif i == 4:
 				x = net.b4_forward(data[key])
 				send_data = x
-			print(send_data.shape)
+			# print(send_data.shape)
 s.close()

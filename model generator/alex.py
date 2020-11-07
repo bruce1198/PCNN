@@ -6,13 +6,18 @@ import sys, os
 from PIL import Image
 import numpy as np
 import pickle
-from pathlib import Path
+from os.path import abspath, dirname
 # estimate
 import time
 load_time = 0
 cal_time = 0
 
-pcnn_path = str(Path(__file__).parent.parent.absolute())
+pcnn_path = dirname(dirname(abspath(__file__)))
+sys.path.insert(0, pcnn_path)
+from fl import FCBlock
+
+def relu(x):
+    return np.maximum(x, 0)
 
 def softmax(x):
     return np.exp(x) / np.sum(np.exp(x), axis=0)
@@ -32,7 +37,7 @@ class Net(nn.Module):
         self.fc2 = nn.Linear(4096, 4096)
         self.fc3 = nn.Linear(4096, 1000)
 
-    def forward(self, x):
+    def forward_origin(self, x):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = F.relu(self.conv3(x))
@@ -43,6 +48,30 @@ class Net(nn.Module):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
+        return x
+
+    def forward(self, x):
+        x = self.pool1(F.relu(self.conv1(x)))
+        x = self.pool2(F.relu(self.conv2(x)))
+        x = F.relu(self.conv3(x))
+        x = F.relu(self.conv4(x))
+        x = F.relu(self.conv5(x))
+        x = self.pool3(x)
+        # x = x.view(-1, 256 * 6 * 6)
+        x = x.view(-1).detach().numpy()
+        w = self.fc1.weight.data.numpy().transpose()
+        fblk = FCBlock('normal', 0, 1)
+        fblk.set_input_size(6.0)
+        fblk.append_layer(w)
+        x = relu(fblk.process(x) + self.fc1.bias.detach().numpy())
+        w1 = self.fc2.weight.data.numpy().transpose()
+        w2 = self.fc3.weight.data.numpy().transpose()
+        fblk = FCBlock('hybrid', 0, 1)
+        fblk.set_bias(self.fc2.bias.detach().numpy())
+        fblk.append_layer(w1)
+        fblk.append_layer(w2)
+        x = fblk.process(x)
+        x += self.fc3.bias.detach().numpy()
         return x
 
 
@@ -65,17 +94,19 @@ if len(sys.argv) == 2:
         x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
 
 start_time = time.time()
-y = net(x)
-y = softmax(y.detach().numpy())
-index = np.argmax(y)
+# y = net.forward_origin(x)
 # print(y.view(-1).detach().numpy()[:50])
+y = net(x)
+# print(y[:50])
+y = softmax(y)
+index = np.argmax(y)
 
 cal_time = time.time() - start_time
 import json
 print(json.dumps({
     'index': int(index),
-    'load_time': load_time,
-    'cal_time': cal_time
+    'load_time': int(1000*load_time),
+    'cal_time': int(1000*cal_time)
 }))
 
 
