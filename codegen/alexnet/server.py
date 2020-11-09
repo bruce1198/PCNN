@@ -190,6 +190,8 @@ def job(conn, condition):
 def softmax(x):
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
+start_time = time.time()
+index = -1
 with socket(AF_INET, SOCK_STREAM) as s:
     try:
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -200,6 +202,7 @@ with socket(AF_INET, SOCK_STREAM) as s:
         net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet.h5')))
         load_time = time.time() - start_time
         condition = threading.Condition()
+        threads = []
         for i in range(device_num):
             conn, addr = s.accept()
             # print('a device connect')
@@ -207,9 +210,10 @@ with socket(AF_INET, SOCK_STREAM) as s:
                 target = job,
                 args = (conn, condition)
             )
+            threads.append(t)
             t.start()
         start_time = time.time()
-        for i in range(device_num):
+        for t in threads:
             t.join()
         # print(y.shape)
         # print(y[:50])

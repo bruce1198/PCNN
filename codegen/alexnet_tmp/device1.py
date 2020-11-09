@@ -5,9 +5,9 @@ import numpy as np
 import json
 import pickle
 import os, sys, struct
-from pathlib import Path
+from os.path import abspath, dirname
 
-path = dirname(dirname(abspath(__file__)))
+path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.insert(0, path)
 from fl import FCBlock
 
@@ -66,7 +66,6 @@ class Net(nn.Module):
 		return x
 
 	def b4_forward(self, x):
-		x = x.view(-1).detach().numpy()
 		fblk = FCBlock('hybrid', 1, 2)
 		fblk.set_bias(self.fc2.bias.detach().numpy())
 		w2 = self.fc2.weight.data.numpy().transpose()
@@ -101,7 +100,7 @@ def recv(sock, n):
 	return data
 
 net = Net()
-net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet_tmp')))
+net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet.h5')))
 
 
 import socket
@@ -136,19 +135,19 @@ for i in range(6):
 				send_data = x[:, :, 0:3, :]
 			elif i == 1:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b1_forward(data[key])
+				x = net.b1_forward(x)
 				send_data = x[:, :, 0:2, :]
 			elif i == 2:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b2_forward(data[key])
+				x = net.b2_forward(x)
 				send_data = x[:, :, 0:1, :]
 			elif i == 3:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b3_forward(data[key])
+				x = net.b3_forward(x)
 				send_data = x
 			elif i == 4:
 				x = net.b4_forward(data[key])
 				send_data = x
-			# print(x.shape)
+			# print(send_data.shape)
 			# do calculate
 s.close()
