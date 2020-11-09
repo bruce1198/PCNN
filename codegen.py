@@ -161,7 +161,7 @@ def write_main():
             begin_index_list = [] 
             end_index_list = [] 
             for iter_ in range(output_begin_idx_in_block, output_end_idx_in_block+1):
-                # data index nedded to be transmitted
+                # data index needed to be transmitted
                 if(mask_list[block_idx][iter_] != -1 and iter_ == output_begin_idx_in_block) \
                     or (mask_list[block_idx][iter_-1] == -1 and mask_list[block_idx][iter_] != -1):
                     begin_index_list.append(iter_)

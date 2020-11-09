@@ -133,7 +133,37 @@ def write_job():
         else:
             f.write('\t\t\t\telif block_id == %d:\n' % (block_idx))
         f.write('\t\t\t\t\tif cnt == 1:\n')
-        if data['layers'][end] == 'conv' or data['layers'][end] == 'pool':
+        if (data['layers'][end] == 'conv' or data['layers'][end] == 'pool') \
+                and (end+1 < len(data['layers'])) \
+                and (data['layers'][end+1] == 'conv' or data['layers'][end+1] == 'pool') :
+            f.write('\t\t\t\t\t\tx = torch.ones(1, %d, %d, %d)\n' % (data['out_channel'][end], data['output'][end], data['output'][end]))
+            for device_idx in range(total_device_num):
+                if device_idx == 0:
+                    f.write('\t\t\t\t\tif idx == 0:\n')
+                else:
+                    f.write('\t\t\t\t\tif idx == %d:\n' % (device_idx))
+                output_begin_idx_in_block = data['padding_info'][device_idx][layer_key[block_idx-1]][-1][0]
+                output_end_idx_in_block = data['padding_info'][device_idx][layer_key[block_idx-1]][-1][1]
+                # print(output_begin_idx_in_block, output_end_idx_in_block)
+                begin_index_list = [] 
+                end_index_list = [] 
+                for iter_ in range(output_begin_idx_in_block, output_end_idx_in_block+1):
+                    # data index needed to be transmitted
+                    if(mask_list[block_idx-1][iter_] != -1 and iter_ == output_begin_idx_in_block) \
+                        or (mask_list[block_idx-1][iter_-1] == -1 and mask_list[block_idx-1][iter_] != -1):
+                        begin_index_list.append(iter_)
+                    if(mask_list[block_idx-1][iter_] != -1 and iter_ == output_end_idx_in_block) \
+                        or (iter_ <= output_end_idx_in_block and mask_list[block_idx-1][iter_] != -1 and mask_list[block_idx-1][iter_+1] == -1):
+                        end_index_list.append(iter_)
+                if len(begin_index_list) > 1:
+                    f.write('\t\t\t\t\t\tx[:, :, %d: %d, :] = data_from_device[:, :, %d:%d, :]\n' % (begin_index_list[0], end_index_list[0], \
+                        begin_index_list[0]-output_begin_idx_in_block, end_index_list[0]-output_begin_idx_in_block+1))
+                    f.write('\t\t\t\t\t\tx[:, :, %d: %d, :] = data_from_device[:, :, %d:%d, :]\n' % (begin_index_list[1], end_index_list[1], \
+                        begin_index_list[1]-output_begin_idx_in_block, end_index_list[1]-output_begin_idx_in_block+1))
+                else:
+                    f.write('\t\t\t\t\t\tx[:, :, %d: %d, :] = data_from_device\n' % \
+                        (begin_index_list[0], end_index_list[0]+1))
+        elif data['layers'][end] == 'conv' or data['layers'][end] == 'pool':
             f.write('\t\t\t\t\t\tx = torch.ones(1, %d, %d, %d)\n' % (data['out_channel'][end], data['output'][end], data['output'][end]))
             for device_idx in range(total_device_num):
                 if device_idx == 0:
@@ -146,8 +176,7 @@ def write_job():
         elif data['layers'][end] == 'FL':
             f.write('\t\t\t\t\t\tx = np.zeros(%d)\n' % (data['out_channel'][end]))
             f.write('\t\t\t\t\tx += data_from_device\n')
-
-            
+ 
     f.write('\t\t\tif cnt < device_num:\n')    
     f.write('\t\t\t\tcondition.wait()\n')  
     f.write('\t\t\tif cnt == device_num:\n')  
@@ -183,7 +212,20 @@ def write_job():
                     f.write('\t\t\t\tif idx == %d:\n' % (device_idx))
                 else:
                     f.write('\t\t\t\telif idx == %d:\n' % (device_idx))
-                if data['layers'][begin] == 'conv':
+                if (begin != 0) and data['layers'][begin] == 'conv'  and (data['layers'][begin-1] == 'conv' or data['layers'][begin-1] == 'pool'):
+                    current_begin = data['devices'][device_idx][layer_key[block_idx]][0]
+                    current_end = data['devices'][device_idx][layer_key[block_idx]][1]
+                    prev_begin = data['padding_info'][device_idx][layer_key[block_idx-1]][-1][0]
+                    prev_end = data['padding_info'][device_idx][layer_key[block_idx-1]][-1][1]
+
+                    if current_begin < prev_begin and current_end > prev_end:
+                        f.write('\t\t\t\t\ty = x[:, :, %d:%d, :]\n' % (current_begin, prev_begin))
+                        f.write('\t\t\t\t\ty = x[:, :, %d:%d, :]\n' % (prev_end+1, current_end+1))
+                    elif current_begin < prev_begin:
+                        f.write('\t\t\t\t\ty = x[:, :, %d:%d, :]\n' % (current_begin, prev_begin))
+                    elif current_end > prev_end:
+                        f.write('\t\t\t\t\ty = x[:, :, %d:%d, :]\n' % (prev_end+1, current_end+1))
+                elif data['layers'][begin] == 'conv':
                     f.write('\t\t\t\t\ty = x[:, :, %d:%d, :]\n' 
                         % (data['devices'][device_idx][layer_key[block_idx]][0], data['devices'][device_idx][layer_key[block_idx]][1]+1))
                 elif data['layers'][begin] == 'FL':

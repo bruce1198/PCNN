@@ -112,10 +112,8 @@ def job(conn, condition):
                     if cnt == 1:
                         x = torch.ones(1, 96, 5, 27)
                     if idx == 0:
-                        pass
                         x[:, :, 0: 2, :] = data_from_device
                     elif idx == 1:
-                        pass
                         x[:, :, 2: 5, :] = data_from_device
                 elif block_id == 2:
                     if cnt == 1:
