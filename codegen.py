@@ -10,8 +10,8 @@ def write_header():
     f.write('import json\n')
     f.write('import pickle\n')
     f.write('import os, sys, struct\n')
-    f.write('from pathlib import Path\n\n')
-    f.write('path = dirname(dirname(abspath(__file__)))\n')
+    f.write('from os.path import dirname, abspath\n\n')
+    f.write('path = dirname(dirname(dirname(abspath(__file__))))\n')
     f.write('sys.path.insert(0, path)\n')
     f.write('from fl import FCBlock\n\n')
 

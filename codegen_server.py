@@ -26,7 +26,7 @@ def write_header():
     f.write('import time\n')
     f.write('load_time = 0\n')
     f.write('cal_time = 0\n')
-    f.write('pcnn_path = dirname(dirname(abspath(__file__)))\n\n')
+    f.write('pcnn_path = dirname(dirname(dirname(abspath(__file__))))\n\n')
     f.write('image_path = sys.argv[4]\n')
     f.write('image = Image.open(image_path)\n')
     f.write('image = image.resize((224, 224), Image.ANTIALIAS)\n')
@@ -272,7 +272,7 @@ def write_socket():
     f.write('\t\t\tthreads.append(t)\n')
     f.write('\t\t\tt.start()\n')
     f.write('\t\tstart_time = time.time()\n')
-    f.write('\t\tfor i in range(device_num):\n')
+    f.write('\t\tfor t in threads:\n')
     f.write('\t\t\tt.join()\n')
     f.write('\t\t# print(y[:50])\n')
     f.write('\t\t# print(y.view(-1).detach().numpy()[:50])\n')
@@ -346,11 +346,6 @@ for model in range(4):
 
         write_relu()
         write_net()
-
-        f.write('start_time = time.time()\n')
-        f.write('net = Net()\n')
-        f.write('net.load_state_dict(torch.load(os.path.join(pcnn_path, \'models\', \'alexnet\')))\n')
-        f.write('load_time = time.time() - start_time\n\n')
 
         write_recvall()
         write_recv()

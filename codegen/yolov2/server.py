@@ -68,11 +68,6 @@ class Net(nn.Module):
 		self.conv21 = nn.Conv2d(in_channels=1280, out_channels=1024, kernel_size=3, stride=1, padding=0)
 		self.conv22 = nn.Conv2d(in_channels=1024, out_channels=425, kernel_size=1, stride=1, padding=0)
 
-start_time = time.time()
-net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
-load_time = time.time() - start_time
-
 def recvall(sock):
 	# Read message length and unpack it into an integer
 	raw_msglen = recv(sock, 4)
@@ -407,7 +402,7 @@ with socket(AF_INET, SOCK_STREAM) as s:
 			threads.append(t)
 			t.start()
 		start_time = time.time()
-		for i in range(device_num):
+		for t in threads:
 			t.join()
 		# print(y[:50])
 		# print(y.view(-1).detach().numpy()[:50])

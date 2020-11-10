@@ -52,11 +52,6 @@ class Net(nn.Module):
 		self.fc2 = nn.Linear(4096, 4096)
 		self.fc3 = nn.Linear(4096, 1000)
 
-start_time = time.time()
-net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
-load_time = time.time() - start_time
-
 def recvall(sock):
 	# Read message length and unpack it into an integer
 	raw_msglen = recv(sock, 4)
@@ -206,7 +201,7 @@ with socket(AF_INET, SOCK_STREAM) as s:
 			threads.append(t)
 			t.start()
 		start_time = time.time()
-		for i in range(device_num):
+		for t in threads:
 			t.join()
 		# print(y[:50])
 		# print(y.view(-1).detach().numpy()[:50])
