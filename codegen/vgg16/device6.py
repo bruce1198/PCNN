@@ -6,9 +6,8 @@ import json
 import pickle
 import os, sys, struct
 from pathlib import Path
-from os.path import abspath, dirname
 
-path = dirname(dirname(dirname(abspath(__file__))))
+path = dirname(dirname(abspath(__file__)))
 sys.path.insert(0, path)
 from fl import FCBlock
 
@@ -100,7 +99,6 @@ class Net(nn.Module):
 		return x
 
 	def b3_forward(self, x):
-		x = x.view(-1).detach().numpy()
 		fblk = FCBlock('hybrid', 6, 7)
 		fblk.set_bias(self.fc2.bias.detach().numpy())
 		w2 = self.fc2.weight.data.numpy().transpose()
@@ -170,11 +168,11 @@ for i in range(5):
 				send_data = x[:, :, 0:3, :]
 			elif i == 1:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b1_forward(data[key])
+				x = net.b1_forward(x)
 				send_data = x[:, :, 0:2, :]
 			elif i == 2:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b2_forward(data[key])
+				x = net.b2_forward(x)
 				send_data = x
 			elif i == 3:
 				x = net.b3_forward(data[key])

@@ -83,7 +83,7 @@ def write_forward():
                     f.write('\t\tfblk.append_layer(w%d)\n' % (fc_idx))
                     fc_idx += 1
                 elif num_of_fc_in_block[idx] == 2:
-                    f.write('\t\tx = x.view(-1).detach().numpy()\n')
+                    # f.write('\t\tx = x.view(-1).detach().numpy()\n')
                     f.write('\t\tfblk = FCBlock(\'hybrid\', %d, %d)\n' % (device_idx, total_device_num))
                     for weight_idx in range(2):
                         if weight_idx == 0:
@@ -101,7 +101,7 @@ def write_forward():
 
 def write_main():
     f.write('net = Net()\n')
-    f.write('net.load_state_dict(torch.load(os.path.join(path, \'models\', \'%s\')))\n\n\n' % (path))
+    f.write('net.load_state_dict(torch.load(os.path.join(path, \'models\', \'%s.h5\')))\n\n\n' % (path))
     f.write('import socket\n\n')
     f.write('s = socket.socket()\n')
     f.write('host = sys.argv[1]\n')
@@ -152,8 +152,9 @@ def write_main():
                 f.write('\t\t\t\tx = torch.cat((x, data[key]), dim=2)\n')
             # if model == 1:
             #     print(current_begin, current_end, prev_begin, prev_end)
-
-        f.write('\t\t\t\tx = net.b%d_forward(data[key])\n' % (block_idx))
+            f.write('\t\t\t\tx = net.b%d_forward(x)\n' % (block_idx))
+        else:
+            f.write('\t\t\t\tx = net.b%d_forward(data[key])\n' % (block_idx))
         if block_idx < len(mask_list):
             output_begin_idx_in_block = data['padding_info'][device_idx][key][-1][0]
             output_end_idx_in_block = data['padding_info'][device_idx][key][-1][1]
@@ -262,7 +263,7 @@ for model in range(4):
         num_of_fc_in_block = np.zeros(total_block_num)
         path = {
             0: 'yolov2',
-            1: 'alexnet_tmp',
+            1: 'alexnet',
             2: 'vgg16',
             3: 'vgg19',
         }.get(model)

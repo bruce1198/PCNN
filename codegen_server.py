@@ -249,12 +249,19 @@ def write_softmax():
     f.write('\treturn np.exp(x) / np.sum(np.exp(x), axis=0)\n\n')
 
 def write_socket():
+    f.write('start_time = time.time()\n')
+    f.write('index = -1\n')
     f.write('with socket(AF_INET, SOCK_STREAM) as s:\n')
     f.write('\ttry:\n')
     f.write('\t\ts.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)\n')
     f.write('\t\ts.bind((HOST, PORT))\n')
     f.write('\t\ts.listen()\n')
+    f.write('\t\tstart_time = time.time()\n')
+    f.write('\t\tnet = Net()\n')
+    f.write('\t\tnet.load_state_dict(torch.load(os.path.join(pcnn_path, \'models\', \'%s.h5\')))\n' % path)
+    f.write('\t\tload_time = time.time() - start_time\n')
     f.write('\t\tcondition = threading.Condition()\n')
+    f.write('\t\tthreads = []\n')
     f.write('\t\tfor i in range(device_num):\n')
     f.write('\t\t\tconn, addr = s.accept()\n')
     f.write('\t\t\t# print(\'a device connect\')\n')
@@ -262,16 +269,26 @@ def write_socket():
     f.write('\t\t\t\ttarget = job,\n')
     f.write('\t\t\t\targs = (conn, condition)\n')
     f.write('\t\t\t)\n')
+    f.write('\t\t\tthreads.append(t)\n')
     f.write('\t\t\tt.start()\n')
+    f.write('\t\tstart_time = time.time()\n')
     f.write('\t\tfor i in range(device_num):\n')
     f.write('\t\t\tt.join()\n')
     f.write('\t\t# print(y[:50])\n')
     f.write('\t\t# print(y.view(-1).detach().numpy()[:50])\n')
     f.write('\t\ty = softmax(y)\n')
     f.write('\t\tindex = np.argmax(y)\n')
-    f.write('\t\tprint(index)\n')
+    f.write('\t\t# print(index)\n')
     f.write('\texcept error:\n')
     f.write('\t\ts.close()\n')
+    f.write('cal_time = time.time() - start_time\n')
+    f.write('import json\n')
+    f.write('print(json.dumps({\n')
+    f.write('\t\'index\': int(index),\n')
+    f.write('\t\'load_time\': int(1000*load_time),\n')
+    f.write('\t\'cal_time\': int(1000*cal_time)\n')
+    f.write('}))\n')
+
 
 def fastmode_calculation():
     mask_list = [] # record whether data need to be send
@@ -318,7 +335,7 @@ for model in range(4):
     mask_list = fastmode_calculation()
     path = {
         0: 'yolov2',
-        1: 'alexnet_tmp',
+        1: 'alexnet',
         2: 'vgg16',
         3: 'vgg19',
     }.get(model)
