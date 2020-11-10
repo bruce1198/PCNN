@@ -64,7 +64,7 @@ class Net(nn.Module):
 
 start_time = time.time()
 net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'vgg16.h5')))
+net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
 load_time = time.time() - start_time
 
 def recvall(sock):

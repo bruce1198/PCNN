@@ -5,9 +5,9 @@ import numpy as np
 import json
 import pickle
 import os, sys, struct
-from pathlib import Path
+from os.path import dirname, abspath
 
-path = dirname(dirname(abspath(__file__)))
+path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.insert(0, path)
 from fl import FCBlock
 
@@ -162,7 +162,7 @@ def recv(sock, n):
 	return data
 
 net = Net()
-net.load_state_dict(torch.load(os.path.join(path, 'models', 'yolov2')))
+net.load_state_dict(torch.load(os.path.join(path, 'models', 'yolov2'.h5)))
 
 
 import socket

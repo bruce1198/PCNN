@@ -10,8 +10,8 @@ def write_header():
     f.write('import json\n')
     f.write('import pickle\n')
     f.write('import os, sys, struct\n')
-    f.write('from pathlib import Path\n\n')
-    f.write('path = dirname(dirname(abspath(__file__)))\n')
+    f.write('from os.path import dirname, abspath\n\n')
+    f.write('path = dirname(dirname(dirname(abspath(__file__))))\n')
     f.write('sys.path.insert(0, path)\n')
     f.write('from fl import FCBlock\n\n')
 
@@ -101,7 +101,7 @@ def write_forward():
 
 def write_main():
     f.write('net = Net()\n')
-    f.write('net.load_state_dict(torch.load(os.path.join(path, \'models\', \'%s\')))\n\n\n' % (path))
+    f.write('net.load_state_dict(torch.load(os.path.join(path, \'models\', \'%s\'.h5)))\n\n\n' % (path))
     f.write('import socket\n\n')
     f.write('s = socket.socket()\n')
     f.write('host = sys.argv[1]\n')
@@ -262,7 +262,7 @@ for model in range(4):
         num_of_fc_in_block = np.zeros(total_block_num)
         path = {
             0: 'yolov2',
-            1: 'alexnet_tmp',
+            1: 'alexnet',
             2: 'vgg16',
             3: 'vgg19',
         }.get(model)

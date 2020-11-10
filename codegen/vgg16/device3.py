@@ -5,7 +5,7 @@ import numpy as np
 import json
 import pickle
 import os, sys, struct
-from os.path import abspath, dirname
+from os.path import dirname, abspath
 
 path = dirname(dirname(dirname(abspath(__file__))))
 sys.path.insert(0, path)
@@ -134,7 +134,7 @@ def recv(sock, n):
 	return data
 
 net = Net()
-net.load_state_dict(torch.load(os.path.join(path, 'models', 'vgg16.h5')))
+net.load_state_dict(torch.load(os.path.join(path, 'models', 'vgg16'.h5)))
 
 
 import socket
