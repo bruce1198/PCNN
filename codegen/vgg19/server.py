@@ -65,11 +65,6 @@ class Net(nn.Module):
 		self.fc2 = nn.Linear(4096, 4096)
 		self.fc3 = nn.Linear(4096, 1000)
 
-start_time = time.time()
-net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'vgg19.h5')))
-load_time = time.time() - start_time
-
 def recvall(sock):
 	# Read message length and unpack it into an integer
 	raw_msglen = recv(sock, 4)
@@ -291,11 +286,17 @@ def job(conn, condition):
 def softmax(x):
 	return np.exp(x) / np.sum(np.exp(x), axis=0)
 
+start_time = time.time()
+index = -1
 with socket(AF_INET, SOCK_STREAM) as s:
 	try:
 		s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 		s.bind((HOST, PORT))
 		s.listen()
+		start_time = time.time()
+		net = Net()
+		net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'vgg19.h5')))
+		load_time = time.time() - start_time
 		condition = threading.Condition()
 		threads = []
 		for i in range(device_num):
@@ -307,6 +308,7 @@ with socket(AF_INET, SOCK_STREAM) as s:
 			)
 			threads.append(t)
 			t.start()
+		start_time = time.time()
 		for t in threads:
 			t.join()
 		# print(y[:50])
@@ -321,5 +323,5 @@ import json
 print(json.dumps({
 	'index': int(index),
 	'load_time': int(1000*load_time),
-	'cal_time': int(1000*cal_time),
+	'cal_time': int(1000*cal_time)
 }))

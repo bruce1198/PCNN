@@ -197,27 +197,27 @@ for i in range(8):
 				send_data = x[:, :, 0:2, :]
 			elif i == 1:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b1_forward(data[key])
+				x = net.b1_forward(x)
 				send_data = x[:, :, 0:1, :]
 			elif i == 2:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b2_forward(data[key])
+				x = net.b2_forward(x)
 				send_data = x[:, :, 0:2, :]
 			elif i == 3:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b3_forward(data[key])
+				x = net.b3_forward(x)
 				send_data = x[:, :, 0:1, :]
 			elif i == 4:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b4_forward(data[key])
+				x = net.b4_forward(x)
 				send_data = x[:, :, 0:1, :]
 			elif i == 5:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b5_forward(data[key])
+				x = net.b5_forward(x)
 				send_data = x[:, :, 0:3, :]
 			elif i == 6:
 				x = torch.cat((data[key], x), dim=2)
-				x = net.b6_forward(data[key])
+				x = net.b6_forward(x)
 				send_data = x
 			# print(x.shape)
 			# do calculate

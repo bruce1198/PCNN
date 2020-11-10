@@ -21,7 +21,7 @@ from os.path import abspath, dirname
 import time
 load_time = 0
 cal_time = 0
-pcnn_path = dirname(dirname(dirname(abspath(__file__))))
+pcnn_path = dirname(dirname(abspath(__file__)))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
@@ -54,7 +54,7 @@ class Net(nn.Module):
 
 start_time = time.time()
 net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet.h5')))
+net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
 load_time = time.time() - start_time
 
 def recvall(sock):
@@ -188,6 +188,10 @@ with socket(AF_INET, SOCK_STREAM) as s:
 		s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 		s.bind((HOST, PORT))
 		s.listen()
+		start_time = time.time()
+		net = Net()
+		net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet.h5')))
+		load_time = time.time() - start_time
 		condition = threading.Condition()
 		threads = []
 		for i in range(device_num):
@@ -199,7 +203,8 @@ with socket(AF_INET, SOCK_STREAM) as s:
 			)
 			threads.append(t)
 			t.start()
-		for t in threads:
+		start_time = time.time()
+		for i in range(device_num):
 			t.join()
 		# print(y[:50])
 		# print(y.view(-1).detach().numpy()[:50])
@@ -213,5 +218,5 @@ import json
 print(json.dumps({
 	'index': int(index),
 	'load_time': int(1000*load_time),
-	'cal_time': int(1000*cal_time),
+	'cal_time': int(1000*cal_time)
 }))

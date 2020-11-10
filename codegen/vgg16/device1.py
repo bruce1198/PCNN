@@ -99,7 +99,6 @@ class Net(nn.Module):
 		return x
 
 	def b3_forward(self, x):
-		x = x.view(-1).detach().numpy()
 		fblk = FCBlock('hybrid', 1, 7)
 		fblk.set_bias(self.fc2.bias.detach().numpy())
 		w2 = self.fc2.weight.data.numpy().transpose()
@@ -169,11 +168,11 @@ for i in range(5):
 				send_data = x[:, :, 0:4, :]
 			elif i == 1:
 				x = torch.cat((data[key][:, :, 0:3, :], x, data[key][:, :, 3:6, :]), dim=2) 
-				x = net.b1_forward(data[key])
+				x = net.b1_forward(x)
 				send_data = x[:, :, 0:2, :]
 			elif i == 2:
 				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:5, :]), dim=2) 
-				x = net.b2_forward(data[key])
+				x = net.b2_forward(x)
 				send_data = x
 			elif i == 3:
 				x = net.b3_forward(data[key])
