@@ -150,6 +150,8 @@ def job(conn, condition):
 					if cnt == 1:
 						x = np.zeros(4096)
 					x += data_from_device
+					if cnt == 7:
+						x = relu(x + net.fc1.bias.detach().numpy())
 				elif block_id == 4:
 					if cnt == 1:
 						x = np.zeros(1000)
@@ -209,20 +211,7 @@ def job(conn, condition):
 				elif idx == 6:
 					y = x[:, :, 9:12, :]
 			elif block_id == 3:
-				if idx == 0:
-					y = relu(x + net.fc2.bias.detach().numpy())
-				elif idx == 1:
-					y = relu(x + net.fc2.bias.detach().numpy())
-				elif idx == 2:
-					y = relu(x + net.fc2.bias.detach().numpy())
-				elif idx == 3:
-					y = relu(x + net.fc2.bias.detach().numpy())
-				elif idx == 4:
-					y = relu(x + net.fc2.bias.detach().numpy())
-				elif idx == 5:
-					y = relu(x + net.fc2.bias.detach().numpy())
-				elif idx == 6:
-					y = relu(x + net.fc2.bias.detach().numpy())
+					y = x
 			elif block_id == 4:
 				y = x + net.fc3.bias.detach().numpy()
 				break
