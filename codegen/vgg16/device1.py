@@ -91,7 +91,6 @@ class Net(nn.Module):
 		x = F.relu(self.conv13(x))
 		x = self.pool5(x)
 		x = x.view(-1).detach().numpy()
-		print(x.shape)
 		w1 = self.fc1.weight.data.numpy().transpose()
 		fblk = FCBlock('normal', 1, 7)
 		fblk.set_input_size(7.0)
@@ -168,7 +167,7 @@ for i in range(5):
 				x = net.b0_forward(data[key])
 				send_data = x[:, :, 0:4, :]
 			elif i == 1:
-				x = torch.cat((data[key][:, :, 0:3, :], x, data[key][:, :, 3:6, :]), dim=2) 
+				x = torch.cat((data[key][:, :, 0:3, :], x, data[key][:, :, 3:6, :]), dim=2)
 				x = net.b1_forward(x)
 				send_data = x[:, :, 0:2, :]
 			elif i == 2:
