@@ -57,7 +57,6 @@ class Net(nn.Module):
 		x = m(x)
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
-		print(x.shape)
 		x = x.view(-1).detach().numpy()
 		w1 = self.fc1.weight.data.numpy().transpose()
 		fblk = FCBlock('normal', 0, 2)

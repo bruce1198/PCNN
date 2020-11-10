@@ -121,7 +121,6 @@ net = Net()
 net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'vgg19.h5')))
 load_time = time.time() - start_time
 
-net = Net()
 if len(sys.argv) == 2:
 	if sys.argv[1] == '-g':
 		torch.save(net.state_dict(), os.path.join(pcnn_path, 'models', 'vgg19.h5'))
@@ -135,11 +134,13 @@ if len(sys.argv) == 2:
 		x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
 
 start_time = time.time()
-# y = net.forward_origin(x)
-# print(y.view(-1).detach().numpy()[:50])
+y = net.forward_origin(x)
+print(y.view(-1).detach().numpy()[:50])
+print(y.view(-1).detach().numpy()[-50:])
 y = net(x)
 # print(y.shape)
-# print(y[:50])
+print(y[:50])
+print(y[-50:])
 y = softmax(y)
 index = np.argmax(y)
 
