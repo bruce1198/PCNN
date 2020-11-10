@@ -255,10 +255,10 @@ def write_socket():
     f.write('\t\ts.bind((HOST, PORT))\n')
     f.write('\t\ts.listen()\n')
     f.write('\t\tcondition = threading.Condition()\n')
+    f.write('\t\tthreads = []\n')
     f.write('\t\tfor i in range(device_num):\n')
     f.write('\t\t\tconn, addr = s.accept()\n')
     f.write('\t\t\t# print(\'a device connect\')\n')
-    f.write('\t\t\tthreads = []\n')
     f.write('\t\t\tt = threading.Thread(\n')
     f.write('\t\t\t\ttarget = job,\n')
     f.write('\t\t\t\targs = (conn, condition)\n')
@@ -271,9 +271,16 @@ def write_socket():
     f.write('\t\t# print(y.view(-1).detach().numpy()[:50])\n')
     f.write('\t\ty = softmax(y)\n')
     f.write('\t\tindex = np.argmax(y)\n')
-    f.write('\t\tprint(index)\n')
+    f.write('\t\t# print(index)\n')
     f.write('\texcept error:\n')
     f.write('\t\ts.close()\n')
+    f.write('cal_time = time.time() - start_time\n')
+    f.write('import json\n')
+    f.write('print(json.dumps({\n')
+    f.write('\t\'index\': int(index),\n')    
+    f.write('\t\'load_time\': int(1000*load_time),\n')
+    f.write('\t\'cal_time\': int(1000*cal_time),\n')
+    f.write('}))')
 
 def fastmode_calculation():
     mask_list = [] # record whether data need to be send
@@ -334,7 +341,7 @@ for model in range(4):
 
         f.write('start_time = time.time()\n')
         f.write('net = Net()\n')
-        f.write('net.load_state_dict(torch.load(os.path.join(pcnn_path, \'models\', \'%s\'.h5)))\n' % path)
+        f.write('net.load_state_dict(torch.load(os.path.join(pcnn_path, \'models\', \'%s.h5\')))\n' % path)
         f.write('load_time = time.time() - start_time\n\n')
 
         write_recvall()

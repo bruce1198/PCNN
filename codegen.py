@@ -101,7 +101,7 @@ def write_forward():
 
 def write_main():
     f.write('net = Net()\n')
-    f.write('net.load_state_dict(torch.load(os.path.join(path, \'models\', \'%s\'.h5)))\n\n\n' % (path))
+    f.write('net.load_state_dict(torch.load(os.path.join(path, \'models\', \'%s.h5\')))\n\n\n' % (path))
     f.write('import socket\n\n')
     f.write('s = socket.socket()\n')
     f.write('host = sys.argv[1]\n')

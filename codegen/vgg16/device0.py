@@ -134,7 +134,7 @@ def recv(sock, n):
 	return data
 
 net = Net()
-net.load_state_dict(torch.load(os.path.join(path, 'models', 'vgg16'.h5)))
+net.load_state_dict(torch.load(os.path.join(path, 'models', 'vgg16.h5')))
 
 
 import socket

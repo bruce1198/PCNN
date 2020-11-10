@@ -70,7 +70,7 @@ class Net(nn.Module):
 
 start_time = time.time()
 net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
+net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'yolov2.h5')))
 load_time = time.time() - start_time
 
 def recvall(sock):
@@ -390,6 +390,7 @@ with socket(AF_INET, SOCK_STREAM) as s:
 		s.bind((HOST, PORT))
 		s.listen()
 		condition = threading.Condition()
+		threads = []
 		for i in range(device_num):
 			conn, addr = s.accept()
 			# print('a device connect')
@@ -397,13 +398,21 @@ with socket(AF_INET, SOCK_STREAM) as s:
 				target = job,
 				args = (conn, condition)
 			)
+			threads.append(t)
 			t.start()
-		for i in range(device_num):
+		for t in threads:
 			t.join()
 		# print(y[:50])
 		# print(y.view(-1).detach().numpy()[:50])
 		y = softmax(y)
 		index = np.argmax(y)
-		print(index)
+		# print(index)
 	except error:
 		s.close()
+cal_time = time.time() - start_time
+import json
+print(json.dumps({
+	'index': int(index),
+	'load_time': int(1000*load_time),
+	'cal_time': int(1000*cal_time),
+}))
