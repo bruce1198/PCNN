@@ -3,13 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import json
-import pickle
-import os, sys, struct
-from os.path import abspath, dirname
-
-path = dirname(dirname(dirname(abspath(__file__))))
-print(path)
-sys.path.insert(0, path)
 from fl import FCBlock
 
 def relu(x):
@@ -53,22 +46,9 @@ class Net(nn.Module):
 		x = self.pad(x, padding_value=1)
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
-		x = x.view(-1).detach().numpy()
-		w = self.fc1.weight.data.numpy().transpose()
-		fblk = FCBlock('normal', 1, 2)
-		fblk.set_input_size(6.0)
-		fblk.append_layer(w)
-		x = fblk.process(x)
 		return x
 
 	def b4_forward(self, x):
-		w1 = self.fc2.weight.data.numpy().transpose()
-		w2 = self.fc3.weight.data.numpy().transpose()
-		fblk = FCBlock('hybrid', 1, 2)
-		fblk.set_bias(self.fc2.bias.detach().numpy())
-		fblk.append_layer(w1)
-		fblk.append_layer(w2)
-		x = fblk.process(x)
 		return x
 
 	def pad(self, x, padding_value):
@@ -77,78 +57,49 @@ class Net(nn.Module):
 		return x
 
 net = Net()
-net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet.h5')))
+net.load_state_dict(torch.load('models/model'))
+################# setting ####################
+num_of_devices = 2
+num_of_blocks = 5
+################# read json ##################
 
+################# block 0 ####################
 
-import socket
- 
-s = socket.socket()
-host = sys.argv[1]
-port = int(sys.argv[2])
+x = torch.ones(1, 3, 114, 224)
+y = net.b0_forward(x)
 
-def sendall(sock, msg):
-    # Prefix each message with a 4-byte length (network byte order)
-    msg = struct.pack('>I', len(msg)) + msg
-    sock.sendall(msg)
+#TODO
+#Send y to the server and get the new input.
 
-def recvall(sock):
-    # Read message length and unpack it into an integer
-    raw_msglen = recv(sock, 4)
-    if not raw_msglen:
-        return None
-    msglen = struct.unpack('>I', raw_msglen)[0]
-    # print(msglen)
-    # Read the message data
-    return recv(sock, msglen)
+################# block 1 ####################
 
-def recv(sock, n):
-    # Helper function to recv n bytes or return None if EOF is hit
-    data = bytearray()
-    while len(data) < n:
-        packet = sock.recv(n - len(data))
-        if not packet:
-            return None
-        data.extend(packet)
-    return data
+x = y[:, :, 12:27, :]
+y = net.b1_forward(x)
 
-s.connect((host, port))
-x = None
-send_data = None
-for i in range(6):
-	sendall(s, pickle.dumps({
-		'key': 'get',
-		'blkId': i,
-		'id': 1,
-		'data': send_data
-	}))
-	if i != 5:
-		try:
-			bytes = recvall(s)
-			if bytes is None:
-				break
-		except ConnectionResetError:
-			break
-		data = pickle.loads(bytes)
-		key = data['key']
-		if key == 'data':
-			# print(data[key].shape)
-			if i == 0:
-				x = net.b0_forward(data[key])
-				send_data = x[:, :, :3, :]
-			elif i == 1:
-				x = torch.cat((data[key], x), dim=2)
-				x = net.b1_forward(x)
-				send_data = x[:, :, :2, :]
-			elif i == 2:
-				x = torch.cat((data[key], x), dim=2)
-				x = net.b2_forward(x)
-				send_data = x[:, :, :1, :]
-			elif i == 3:
-				x = torch.cat((data[key], x), dim=2)
-				x = net.b3_forward(x)
-				send_data = x
-			elif i == 4:
-				x = net.b4_forward(data[key])
-				send_data = x
-			# print(send_data.shape)
-s.close()
+#TODO
+#Send y to the server and get the new input.
+
+################# block 2 ####################
+
+x = y[:, :, 5:13, :]
+y = net.b2_forward(x)
+
+#TODO
+#Send y to the server and get the new input.
+
+################# block 3 ####################
+
+x = y[:, :, 5:13, :]
+y = net.b3_forward(x)
+
+#TODO
+#Send y to the server and get the new input.
+
+################# block 4 ####################
+
+x = y[:, :, 0:4096, :]
+y = net.b4_forward(x)
+
+#TODO
+#Send y to the server and get the new input.
+
