@@ -83,7 +83,7 @@ load_time = time.time() - start_time
 
 if len(sys.argv) == 2:
     if sys.argv[1] == '-g':
-        torch.save(net.state_dict(), os.path.join(pcnn_path, 'models', 'alexnet'))
+        torch.save(net.state_dict(), os.path.join(pcnn_path, 'models', 'alexnet.h5'))
         exit(0)
     else:
         image_path = sys.argv[1]

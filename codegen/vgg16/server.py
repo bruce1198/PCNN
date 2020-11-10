@@ -21,7 +21,7 @@ from os.path import abspath, dirname
 import time
 load_time = 0
 cal_time = 0
-pcnn_path = dirname(dirname(abspath(__file__)))
+pcnn_path = dirname(dirname(dirname(abspath(__file__))))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
@@ -64,7 +64,7 @@ class Net(nn.Module):
 
 start_time = time.time()
 net = Net()
-net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet')))
+net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'vgg16.h5')))
 load_time = time.time() - start_time
 
 def recvall(sock):
