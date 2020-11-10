@@ -21,7 +21,7 @@ from os.path import abspath, dirname
 import time
 load_time = 0
 cal_time = 0
-pcnn_path = dirname(dirname(abspath(__file__)))
+pcnn_path = dirname(dirname(dirname(abspath(__file__))))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)

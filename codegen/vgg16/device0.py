@@ -91,6 +91,7 @@ class Net(nn.Module):
 		x = F.relu(self.conv13(x))
 		x = self.pool5(x)
 		x = x.view(-1).detach().numpy()
+		print(x.shape)
 		w1 = self.fc1.weight.data.numpy().transpose()
 		fblk = FCBlock('normal', 0, 7)
 		fblk.set_input_size(7.0)
