@@ -1,7 +1,7 @@
 import math
 from config import *
 import json
-
+import numpy as np
 class Prefetcher:
 
     def __init__(self, name):
@@ -59,6 +59,7 @@ class Prefetcher:
         idx = self.get_fastest_slicing_blocks()
         blocks = self.slicing_blocks[idx]
         self.json['devices'] = [{} for i in range(idx+1)]
+        self.json['padding_info'] = [{} for i in range(idx+1)]
         for blk in blocks:
             self.get_prefetch_index(block=blk, device_num=idx+1)
             
@@ -70,6 +71,9 @@ class Prefetcher:
         e = [0 for i in range(device_num)]
         layer1 = block[0]
         layer2 = block[1]
+        layers_in_block = block[1] - block[0] + 1
+        index = [[[0, 0] for i in range(layers_in_block)] for j in range(device_num)] 
+        # print(np.array(index).shape, device_num, layers_in_block)
         is_hybrid = False
         for layer in range(layer2, layer1-1, -1):
             for idx in range(device_num):
@@ -127,12 +131,23 @@ class Prefetcher:
                         e[idx] = end
                         # b[idx] = int(idx*math.ceil(o/device_num))
                         # e[idx] = int(min((idx+1)*math.ceil(o/device_num), o)-1)
-                    # print(idx, b[idx], e[idx])
+                    if layer == layer2:
+                        index[idx][layer-layer1][0] = b[idx]
+                        index[idx][layer-layer1][1] = e[idx]
+                    else:
+                        index[idx][layer-layer1][0] = int(b[idx]*s-p) # begin index
+                        index[idx][layer-layer1][1] = int(max(e[idx]*s-p+fs-1,0)) # end index
+                    
                     b[idx] = int(max(b[idx]*s-p, 0))
                     e[idx] = int(min(max(e[idx]*s-p+fs-1,0), i-1))
-                
+
+
+        # print(index[0])  
         for idx in range(device_num):
+            # print(idx)
             self.json['devices'][idx][key] = [b[idx], e[idx]]
+            self.json['padding_info'][idx][key] = index[idx]
+            # self.json['devices'][idx][key] = [b[idx], e[idx]]
             # print('device '+str(idx)+' should prefetch date from '+str(b[idx])+' to '+str(e[idx]))
 
     def jsonify(self):

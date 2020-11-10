@@ -3,6 +3,12 @@ import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import json
+import pickle
+import os, sys, struct
+from pathlib import Path
+
+path = dirname(dirname(abspath(__file__)))
+sys.path.insert(0, path)
 from fl import FCBlock
 
 def relu(x):
@@ -40,140 +46,179 @@ class Net(nn.Module):
 		self.conv22 = nn.Conv2d(in_channels=1024, out_channels=425, kernel_size=1, stride=1, padding=0)
 
 	def b0_forward(self, x):
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv1(x))
 		x = self.pool1(x)
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 219), 0)
+		x = m(x)
 		x = F.relu(self.conv2(x))
 		x = self.pool2(x)
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 371), 0)
+		x = m(x)
 		x = F.relu(self.conv3(x))
-		x = self.pad(x, padding_value=0)
+		m = nn.ConstantPad2d((0, 0, 0, 371), 0)
+		x = m(x)
 		x = F.relu(self.conv4(x))
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 371), 0)
+		x = m(x)
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
 		return x
 
 	def b1_forward(self, x):
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv6(x))
-		x = self.pad(x, padding_value=0)
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv7(x))
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv8(x))
 		x = self.pool4(x)
 		return x
 
 	def b2_forward(self, x):
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv9(x))
-		x = self.pad(x, padding_value=0)
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv10(x))
 		return x
 
 	def b3_forward(self, x):
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv11(x))
-		x = self.pad(x, padding_value=0)
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv12(x))
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv13(x))
 		x = self.pool5(x)
 		return x
 
 	def b4_forward(self, x):
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv14(x))
-		x = self.pad(x, padding_value=0)
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv15(x))
 		return x
 
 	def b5_forward(self, x):
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv16(x))
-		x = self.pad(x, padding_value=0)
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv17(x))
 		return x
 
 	def b6_forward(self, x):
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		x = m(x)
 		x = F.relu(self.conv18(x))
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		x = m(x)
 		x = F.relu(self.conv19(x))
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		x = m(x)
 		x = F.relu(self.conv20(x))
-		x = self.pad(x, padding_value=1)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		x = m(x)
 		x = F.relu(self.conv21(x))
-		x = self.pad(x, padding_value=0)
+		m = nn.ConstantPad2d((0, 0, 0, 1), 0)
+		x = m(x)
 		x = F.relu(self.conv22(x))
 		return x
 
-	def pad(self, x, padding_value):
-		m = nn.ConstantPad2d((padding_value, padding_value, 0, 0), 0)
-		x = m(x)
-		return x
+def sendall(sock, msg):
+	# Prefix each message with a 4-byte length (network byte order)
+	msg = struct.pack('>I', len(msg)) + msg
+	sock.sendall(msg)
+
+def recvall(sock):
+	# Read message length and unpack it into an integer
+	raw_msglen = recv(sock, 4)
+	if not raw_msglen:
+		return None
+	msglen = struct.unpack('>I', raw_msglen)[0]
+	# Read the message data
+	return recv(sock, msglen)
+
+def recv(sock, n):
+	# Helper function to recv n bytes or return None if EOF is hit
+	data = bytearray()
+	while len(data) < n:
+		packet = sock.recv(n - len(data))
+		if not packet:
+			return None
+		data.extend(packet)
+	return data
 
 net = Net()
-net.load_state_dict(torch.load('models/model'))
-################# setting ####################
-num_of_devices = 6
-num_of_blocks = 7
-################# read json ##################
+net.load_state_dict(torch.load(os.path.join(path, 'models', 'yolov2')))
 
-################# block 0 ####################
 
-x = torch.ones(1, 3, 118, 608)
-y = net.b0_forward(x)
+import socket
 
-#TODO
-#Send y to the server and get the new input.
+s = socket.socket()
+host = sys.argv[1]
+port = int(sys.argv[2])
+print(host, port)
 
-################# block 1 ####################
-
-x = y[:, :, 50:66, :]
-y = net.b1_forward(x)
-
-#TODO
-#Send y to the server and get the new input.
-
-################# block 2 ####################
-
-x = y[:, :, 25:33, :]
-y = net.b2_forward(x)
-
-#TODO
-#Send y to the server and get the new input.
-
-################# block 3 ####################
-
-x = y[:, :, 24:34, :]
-y = net.b3_forward(x)
-
-#TODO
-#Send y to the server and get the new input.
-
-################# block 4 ####################
-
-x = y[:, :, 12:17, :]
-y = net.b4_forward(x)
-
-#TODO
-#Send y to the server and get the new input.
-
-################# block 5 ####################
-
-x = y[:, :, 12:17, :]
-y = net.b5_forward(x)
-
-#TODO
-#Send y to the server and get the new input.
-
-################# block 6 ####################
-
-x = y[:, :, 9:19, :]
-y = net.b6_forward(x)
-
-#TODO
-#Send y to the server and get the new input.
-
+s.connect((host, port))
+x = None
+send_data = None
+for i in range(8):
+	sendall(s, pickle.dumps({
+		'key': 'get',
+		'blkId': i,
+		'id': 4,
+		'data': send_data
+	}))
+	if i != 7:
+		try:
+			bytes = recvall(s)
+			if bytes is None:
+				break
+		except ConnectionResetError:
+			break
+		data = pickle.loads(bytes)
+		key = data['key']
+		if key == 'data':
+			if i == 0:
+				x = net.b0_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:2, :], x[:, :, 10:12, :], dim=2))
+			elif i == 1:
+				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:4, :]), dim=2) 
+				x = net.b1_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 5:6, :], dim=2))
+			elif i == 2:
+				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
+				x = net.b2_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:2, :], x[:, :, 4:6, :], dim=2))
+			elif i == 3:
+				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:4, :]), dim=2) 
+				x = net.b3_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:3, :], dim=2))
+			elif i == 4:
+				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
+				x = net.b4_forward(data[key])
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:3, :], dim=2))
+			elif i == 5:
+				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
+				x = net.b5_forward(data[key])
+				send_data = x[:, :, 0:3, :]
+			elif i == 6:
+				x = torch.cat((data[key][:, :, 0:4, :], x, data[key][:, :, 4:7, :]), dim=2) 
+				x = net.b6_forward(data[key])
+				send_data = x
+			# print(x.shape)
+			# do calculate
+s.close()

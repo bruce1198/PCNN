@@ -26,14 +26,11 @@ pcnn_path = dirname(dirname(dirname(abspath(__file__))))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
-image = image.resize((224, 224), Image.ANTIALIAS )
+image = image.resize((224, 224), Image.ANTIALIAS)
 # convert image to numpy array
 x = np.array([np.asarray(image)[:, :, :3]])
 x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
-# x = np.array([np.arange(224*224*3).reshape(224, 224, 3)])
-# x = torch.ones(1, 3, 224, 224)
-# print(x.view(-1).detach().numpy()[:50])
-# print(x.shape)
+
 
 y = None
 cnt = 0
@@ -63,7 +60,6 @@ def recvall(sock):
         return None
     msglen = struct.unpack('>I', raw_msglen)[0]
     # Read the message data
-    # print(msglen)
     return recv(sock, msglen)
 
 def recv(sock, n):
@@ -194,6 +190,8 @@ def job(conn, condition):
 def softmax(x):
     return np.exp(x) / np.sum(np.exp(x), axis=0)
 
+start_time = time.time()
+index = -1
 with socket(AF_INET, SOCK_STREAM) as s:
     try:
         s.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
@@ -204,6 +202,7 @@ with socket(AF_INET, SOCK_STREAM) as s:
         net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet.h5')))
         load_time = time.time() - start_time
         condition = threading.Condition()
+        threads = []
         for i in range(device_num):
             conn, addr = s.accept()
             # print('a device connect')
@@ -211,9 +210,10 @@ with socket(AF_INET, SOCK_STREAM) as s:
                 target = job,
                 args = (conn, condition)
             )
+            threads.append(t)
             t.start()
         start_time = time.time()
-        for i in range(device_num):
+        for t in threads:
             t.join()
         # print(y.shape)
         # print(y[:50])

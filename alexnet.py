@@ -26,29 +26,57 @@ class Net(nn.Module):
 
 	def b0_forward(self, x, device_num):
 		self.device_num = device_num
-		x = self.pad(x, padding_value=2)
+		if device_num == 0:
+			m = nn.ConstantPad2d((2, 2, 1, 0), 0)
+		elif device_num == 1:
+			m = nn.ConstantPad2d((2, 2, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((2, 2, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv1(x))
 		x = self.pool1(x)
 		return x
 
 	def b1_forward(self, x, device_num):
 		self.device_num = device_num
-		x = self.pad(x, padding_value=2)
+		if device_num == 0:
+			m = nn.ConstantPad2d((2, 2, 1, 0), 0)
+		elif device_num == 1:
+			m = nn.ConstantPad2d((2, 2, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((2, 2, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv2(x))
 		x = self.pool2(x)
 		return x
 
 	def b2_forward(self, x, device_num):
 		self.device_num = device_num
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 1:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv3(x))
-		x = self.pad(x, padding_value=1)
+		if device_num == 			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv4(x))
 		return x
 
 	def b3_forward(self, x, device_num):
 		self.device_num = device_num
-		x = self.pad(x, padding_value=1)
+		if device_num == 0:
+			m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		elif device_num == 1:
+			m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		else:
+			m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		x = m(x)
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
 		x = x.view(-1).detach().numpy()
@@ -68,16 +96,6 @@ class Net(nn.Module):
 		fblk.append_layer(w1)
 		fblk.append_layer(w2)
 		x = fblk.process(x)
-		return x
-
-	def pad(self, x, padding_value):
-		if self.device_num == 0:
-			m = nn.ConstantPad2d((padding_value, padding_value, padding_value, 0), 0)
-		elif self.device_num == 1:
-			m = nn.ConstantPad2d((padding_value, padding_value, 0, padding_value), 0)
-		else:
-			m = nn.ConstantPad2d((padding_value, padding_value, 0, 0), 0)
-		x = m(x)
 		return x
 
 net = Net()
@@ -138,4 +156,6 @@ y = relu(y1 + y2 + net.fc1.bias.detach().numpy())
 y1 = net.b4_forward(y, 0)
 y2 = net.b4_forward(y, 1)
 
+
 y = y1 + y2 + net.fc3.bias.detach().numpy()
+print(y[:50])
