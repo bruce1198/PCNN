@@ -51,21 +51,26 @@ def write_forward():
         layer_idx_in_block = 0
         
         
-        
         begin = int(key.split(',')[0])
         end = int(key.split(',')[1])
+
         for i in range(begin, end+1):
             begin_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][0]
             end_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][1]
-            # if path == 'vgg16' and device_idx == 1:
-            #     print(begin_idx_in_layer, end_idx_in_layer, key)
+            
             if data['layers'][i] == 'conv':
-                if begin_idx_in_layer < 0:
-                    f.write('\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', '+str(int(abs(begin_idx_in_layer)))+', 0), 0)\n')
-                elif end_idx_in_layer >= data['input'][i]:
-                    f.write('\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', 0, '+str(int(end_idx_in_layer - data['input'][i] + 1))+'), 0)\n')
+                if i == end:
+                    if device_idx == 0:
+                        f.write('\t\tm = nn.ConstantPad2d((%d, %d, %d, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(data['padding'][i])))
+                    elif device_idx == total_device_num-1:
+                        f.write('\t\tm = nn.ConstantPad2d((%d, %d, 0, %d), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(data['padding'][i])))
                 else:
-                    f.write('\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', 0, 0), 0)\n')
+                    if begin_idx_in_layer < 0:
+                        f.write('\t\tm = nn.ConstantPad2d((%d, %d, %d, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(abs(begin_idx_in_layer))))
+                    elif end_idx_in_layer >= data['input'][i]:
+                        f.write('\t\tm = nn.ConstantPad2d((%d, %d, 0, %d), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(end_idx_in_layer - data['input'][i] + 1)))
+                    else:
+                        f.write('\t\tm = nn.ConstantPad2d((%d, %d, 0, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i])))
                 # f.write('\t\tx = self.pad(x, padding_value='+str(int(data['padding'][i]))+')\n')
                 f.write('\t\tx = m(x)\n')
                 f.write('\t\tx = F.relu(self.conv'+str(conv_idx)+'(x))\n')

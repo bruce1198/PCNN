@@ -142,6 +142,7 @@ class Prefetcher:
                     e[idx] = int(min(max(e[idx]*s-p+fs-1,0), i-1))
 
 
+
         # print(index[0])  
         for idx in range(device_num):
             # print(idx)
