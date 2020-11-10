@@ -128,6 +128,7 @@ start_time = time.time()
 # print(y.view(-1).detach().numpy()[:50])
 y = net(x)
 # print(y[:50])
+# print(y[-50:])
 y = softmax(y)
 index = np.argmax(y)
 
