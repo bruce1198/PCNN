@@ -113,6 +113,7 @@ def write_job():
     f.write('\t\t\tcnt += 1\n')
     f.write('\t\t\tif data_from_device is not None:\n')
     f.write('\t\t\t\t# print(data_from_device.shape)\n')
+    # merge data
     layer_key = []
     for block_idx, key in enumerate(data['devices'][0]):
         layer_key.append(key)
@@ -186,6 +187,7 @@ def write_job():
     f.write('\t\t\t# print(idx, cnt)\n')
     f.write('\t\t\t# group[data[\'id\']] = conn\n')
     f.write('\t\t\t# assign data\n')
+    # send data
     # count fc layer idx
     fc_idx = []
     count = 0
@@ -219,8 +221,7 @@ def write_job():
                     prev_end = data['padding_info'][device_idx][layer_key[block_idx-1]][-1][1]
 
                     if current_begin < prev_begin and current_end > prev_end:
-                        f.write('\t\t\t\t\ty = x[:, :, %d:%d, :]\n' % (current_begin, prev_begin))
-                        f.write('\t\t\t\t\ty = x[:, :, %d:%d, :]\n' % (prev_end+1, current_end+1))
+                        f.write('\t\t\t\t\ty = torch.cat((x[:, :, %d:%d, :], x[:, :, %d:%d, :]), dim=2)\n' % (current_begin, prev_begin, prev_end+1, current_end+1))
                     elif current_begin < prev_begin:
                         f.write('\t\t\t\t\ty = x[:, :, %d:%d, :]\n' % (current_begin, prev_begin))
                     elif current_end > prev_end:
