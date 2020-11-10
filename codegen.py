@@ -50,11 +50,15 @@ def write_forward():
         f.write('\tdef b'+str(idx)+'_forward(self, x):\n')
         layer_idx_in_block = 0
         
-        begin_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][0]
-        end_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][1]
+        
+        
         begin = int(key.split(',')[0])
         end = int(key.split(',')[1])
         for i in range(begin, end+1):
+            begin_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][0]
+            end_idx_in_layer = data['padding_info'][device_idx][key][layer_idx_in_block][1]
+            # if path == 'vgg16' and device_idx == 1:
+            #     print(begin_idx_in_layer, end_idx_in_layer, key)
             if data['layers'][i] == 'conv':
                 if begin_idx_in_layer < 0:
                     f.write('\t\tm = nn.ConstantPad2d(('+str(int(data['padding'][i]))+', '+str(int(data['padding'][i]))+', '+str(int(abs(begin_idx_in_layer)))+', 0), 0)\n')
@@ -95,7 +99,7 @@ def write_forward():
                     fc_idx += 2
                 f.write('\t\tx = fblk.process(x)\n')
                 
-            layer_idx_in_block
+            layer_idx_in_block += 1
         f.write('\t\treturn x\n')
         f.write('\n')
 

@@ -47,7 +47,7 @@ class Net(nn.Module):
 		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv3(x))
-		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv4(x))
 		return x
