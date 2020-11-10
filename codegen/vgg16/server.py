@@ -21,7 +21,7 @@ from os.path import abspath, dirname
 import time
 load_time = 0
 cal_time = 0
-pcnn_path = dirname(dirname(abspath(__file__)))
+pcnn_path = dirname(dirname(dirname(abspath(__file__))))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
@@ -182,40 +182,30 @@ def job(conn, condition):
 				if idx == 0:
 					y = x[:, :, 4:7, :]
 				elif idx == 1:
-					y = x[:, :, 1:4, :]
-					y = x[:, :, 8:11, :]
+					y = torch.cat((x[:, :, 1:4, :], x[:, :, 8:11, :]), dim=2)
 				elif idx == 2:
-					y = x[:, :, 5:8, :]
-					y = x[:, :, 12:15, :]
+					y = torch.cat((x[:, :, 5:8, :], x[:, :, 12:15, :]), dim=2)
 				elif idx == 3:
-					y = x[:, :, 9:12, :]
-					y = x[:, :, 16:19, :]
+					y = torch.cat((x[:, :, 9:12, :], x[:, :, 16:19, :]), dim=2)
 				elif idx == 4:
-					y = x[:, :, 13:16, :]
-					y = x[:, :, 20:23, :]
+					y = torch.cat((x[:, :, 13:16, :], x[:, :, 20:23, :]), dim=2)
 				elif idx == 5:
-					y = x[:, :, 17:20, :]
-					y = x[:, :, 24:27, :]
+					y = torch.cat((x[:, :, 17:20, :], x[:, :, 24:27, :]), dim=2)
 				elif idx == 6:
 					y = x[:, :, 21:24, :]
 			elif block_id == 2:
 				if idx == 0:
 					y = x[:, :, 2:5, :]
 				elif idx == 1:
-					y = x[:, :, 0:2, :]
-					y = x[:, :, 4:7, :]
+					y = torch.cat((x[:, :, 0:2, :], x[:, :, 4:7, :]), dim=2)
 				elif idx == 2:
-					y = x[:, :, 1:4, :]
-					y = x[:, :, 6:9, :]
+					y = torch.cat((x[:, :, 1:4, :], x[:, :, 6:9, :]), dim=2)
 				elif idx == 3:
-					y = x[:, :, 3:6, :]
-					y = x[:, :, 8:11, :]
+					y = torch.cat((x[:, :, 3:6, :], x[:, :, 8:11, :]), dim=2)
 				elif idx == 4:
-					y = x[:, :, 5:8, :]
-					y = x[:, :, 10:13, :]
+					y = torch.cat((x[:, :, 5:8, :], x[:, :, 10:13, :]), dim=2)
 				elif idx == 5:
-					y = x[:, :, 7:10, :]
-					y = x[:, :, 12:14, :]
+					y = torch.cat((x[:, :, 7:10, :], x[:, :, 12:14, :]), dim=2)
 				elif idx == 6:
 					y = x[:, :, 9:12, :]
 			elif block_id == 3:

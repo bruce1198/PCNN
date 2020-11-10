@@ -21,7 +21,7 @@ from os.path import abspath, dirname
 import time
 load_time = 0
 cal_time = 0
-pcnn_path = dirname(dirname(abspath(__file__)))
+pcnn_path = dirname(dirname(dirname(abspath(__file__))))
 
 image_path = sys.argv[4]
 image = Image.open(image_path)
@@ -269,101 +269,78 @@ def job(conn, condition):
 				if idx == 0:
 					y = x[:, :, 13:16, :]
 				elif idx == 1:
-					y = x[:, :, 12:13, :]
-					y = x[:, :, 26:30, :]
+					y = torch.cat((x[:, :, 12:13, :], x[:, :, 26:30, :]), dim=2)
 				elif idx == 2:
 					y = x[:, :, 39:42, :]
 				elif idx == 3:
-					y = x[:, :, 38:39, :]
-					y = x[:, :, 52:54, :]
+					y = torch.cat((x[:, :, 38:39, :], x[:, :, 52:54, :]), dim=2)
 				elif idx == 4:
-					y = x[:, :, 50:52, :]
-					y = x[:, :, 64:66, :]
+					y = torch.cat((x[:, :, 50:52, :], x[:, :, 64:66, :]), dim=2)
 				elif idx == 5:
 					y = x[:, :, 62:64, :]
 			elif block_id == 2:
 				if idx == 0:
 					y = x[:, :, 7:8, :]
 				elif idx == 1:
-					y = x[:, :, 6:7, :]
-					y = x[:, :, 14:15, :]
+					y = torch.cat((x[:, :, 6:7, :], x[:, :, 14:15, :]), dim=2)
 				elif idx == 2:
-					y = x[:, :, 13:14, :]
-					y = x[:, :, 20:21, :]
+					y = torch.cat((x[:, :, 13:14, :], x[:, :, 20:21, :]), dim=2)
 				elif idx == 3:
-					y = x[:, :, 19:20, :]
-					y = x[:, :, 26:27, :]
+					y = torch.cat((x[:, :, 19:20, :], x[:, :, 26:27, :]), dim=2)
 				elif idx == 4:
-					y = x[:, :, 25:26, :]
-					y = x[:, :, 32:33, :]
+					y = torch.cat((x[:, :, 25:26, :], x[:, :, 32:33, :]), dim=2)
 				elif idx == 5:
 					y = x[:, :, 31:32, :]
 			elif block_id == 3:
 				if idx == 0:
 					y = x[:, :, 7:10, :]
 				elif idx == 1:
-					y = x[:, :, 6:7, :]
-					y = x[:, :, 14:16, :]
+					y = torch.cat((x[:, :, 6:7, :], x[:, :, 14:16, :]), dim=2)
 				elif idx == 2:
-					y = x[:, :, 12:14, :]
-					y = x[:, :, 20:22, :]
+					y = torch.cat((x[:, :, 12:14, :], x[:, :, 20:22, :]), dim=2)
 				elif idx == 3:
-					y = x[:, :, 18:20, :]
-					y = x[:, :, 26:28, :]
+					y = torch.cat((x[:, :, 18:20, :], x[:, :, 26:28, :]), dim=2)
 				elif idx == 4:
-					y = x[:, :, 24:26, :]
-					y = x[:, :, 32:34, :]
+					y = torch.cat((x[:, :, 24:26, :], x[:, :, 32:34, :]), dim=2)
 				elif idx == 5:
 					y = x[:, :, 30:32, :]
 			elif block_id == 4:
 				if idx == 0:
 					y = x[:, :, 4:5, :]
 				elif idx == 1:
-					y = x[:, :, 3:4, :]
-					y = x[:, :, 7:8, :]
+					y = torch.cat((x[:, :, 3:4, :], x[:, :, 7:8, :]), dim=2)
 				elif idx == 2:
-					y = x[:, :, 6:7, :]
-					y = x[:, :, 10:11, :]
+					y = torch.cat((x[:, :, 6:7, :], x[:, :, 10:11, :]), dim=2)
 				elif idx == 3:
-					y = x[:, :, 9:10, :]
-					y = x[:, :, 13:14, :]
+					y = torch.cat((x[:, :, 9:10, :], x[:, :, 13:14, :]), dim=2)
 				elif idx == 4:
-					y = x[:, :, 12:13, :]
-					y = x[:, :, 16:17, :]
+					y = torch.cat((x[:, :, 12:13, :], x[:, :, 16:17, :]), dim=2)
 				elif idx == 5:
 					y = x[:, :, 15:16, :]
 			elif block_id == 5:
 				if idx == 0:
 					y = x[:, :, 4:5, :]
 				elif idx == 1:
-					y = x[:, :, 3:4, :]
-					y = x[:, :, 7:8, :]
+					y = torch.cat((x[:, :, 3:4, :], x[:, :, 7:8, :]), dim=2)
 				elif idx == 2:
-					y = x[:, :, 6:7, :]
-					y = x[:, :, 10:11, :]
+					y = torch.cat((x[:, :, 6:7, :], x[:, :, 10:11, :]), dim=2)
 				elif idx == 3:
-					y = x[:, :, 9:10, :]
-					y = x[:, :, 13:14, :]
+					y = torch.cat((x[:, :, 9:10, :], x[:, :, 13:14, :]), dim=2)
 				elif idx == 4:
-					y = x[:, :, 12:13, :]
-					y = x[:, :, 16:17, :]
+					y = torch.cat((x[:, :, 12:13, :], x[:, :, 16:17, :]), dim=2)
 				elif idx == 5:
 					y = x[:, :, 15:16, :]
 			elif block_id == 6:
 				if idx == 0:
 					y = x[:, :, 4:8, :]
 				elif idx == 1:
-					y = x[:, :, 0:4, :]
-					y = x[:, :, 7:11, :]
+					y = torch.cat((x[:, :, 0:4, :], x[:, :, 7:11, :]), dim=2)
 				elif idx == 2:
-					y = x[:, :, 3:7, :]
-					y = x[:, :, 10:14, :]
+					y = torch.cat((x[:, :, 3:7, :], x[:, :, 10:14, :]), dim=2)
 				elif idx == 3:
-					y = x[:, :, 6:10, :]
-					y = x[:, :, 13:17, :]
+					y = torch.cat((x[:, :, 6:10, :], x[:, :, 13:17, :]), dim=2)
 				elif idx == 4:
-					y = x[:, :, 9:13, :]
-					y = x[:, :, 16:19, :]
+					y = torch.cat((x[:, :, 9:13, :], x[:, :, 16:19, :]), dim=2)
 				elif idx == 5:
 					y = x[:, :, 12:16, :]
 			elif block_id == 7:
