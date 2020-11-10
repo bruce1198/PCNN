@@ -121,8 +121,7 @@ def write_job():
         if layer == 'FL':
             count += 1
         fc_idx.append(count) 
-    if path == 'vgg16':
-        print(fc_idx)
+
 
     layer_key = []
     for block_idx, key in enumerate(data['devices'][0]):
@@ -323,8 +322,6 @@ def fastmode_calculation():
                 if current_end < next_end:
                     mask[current_end:next_end+1] = 0
             mask_list.append(mask)
-    if(model == 1):
-        print(len(mask_list))
     return(mask_list)
 
 
