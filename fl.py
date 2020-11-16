@@ -22,6 +22,9 @@ class FCBlock:
     def set_bias(self, bias):
         self.bias = bias
 
+    def set_pre_cal_w(self, w):
+        self.w = w
+
     def get_weights(self):
         return self.w
     
@@ -30,46 +33,52 @@ class FCBlock:
 
     def process(self, X):
         if self.mode == 'normal':
-            if len(self.layers) != 1:
-                print('Total layer should be one on normal mode!')
-                return
-            else:
-                size = self.layers[0].shape[0]
-                size2 = self.layers[0].shape[1]
-                input_size = int(self.input_size)
-                avg = int(math.floor(input_size/self.device_num))
-                total = avg
-                mod = input_size % self.device_num
-                start = 0
-                for ii in range(self.idx):
-                    if ii < mod:
-                        start += avg+1
-                    else:
-                        start += avg
-                if self.idx < mod:
-                    total += 1
-                height = total
-                stride = input_size * input_size
-                # print(size)
-                # print(stride)
-                height1 = int(size * height / input_size)
-                w = np.float32(np.zeros(shape=(height1, size2)))
-                cnt = 0
-                # print(start)
-                for i in range(start*input_size, size, stride):
-                    pos = cnt * height*input_size
-                    w[pos:pos+height*input_size, :] = self.layers[0][i:i+height*input_size, :]
-                    # print('w['+str(pos)+':'+str(pos+height*input_size)+'] = layer['+str(i)+':'+str(i+height*input_size)+']')
-                    cnt += 1
-                ans = np.matmul(X, w)
-                self.w = w
-                return ans
+            # if len(self.layers) != 1:
+            #     print('Total layer should be one on normal mode!')
+            #     return
+            # else:
+                # size = self.layers[0].shape[0]
+                # size2 = self.layers[0].shape[1]
+                # input_size = int(self.input_size)
+                # avg = int(math.floor(input_size/self.device_num))
+                # total = avg
+                # mod = input_size % self.device_num
+                # start = 0
+                # for ii in range(self.idx):
+                #     if ii < mod:
+                #         start += avg+1
+                #     else:
+                #         start += avg
+                # if self.idx < mod:
+                #     total += 1
+                # height = total
+                # stride = input_size * input_size
+                # # print(size)
+                # # print(stride)
+                # height1 = int(size * height / input_size)
+                # w = np.float32(np.zeros(shape=(height1, size2)))
+                # cnt = 0
+                # # print(start)
+                # # import time
+                # # start_time = time.time()
+                # for i in range(start*input_size, size, stride):
+                #     pos = cnt * height*input_size
+                #     w[pos:pos+height*input_size, :] = self.layers[0][i:i+height*input_size, :]
+                #     # print('w['+str(pos)+':'+str(pos+height*input_size)+'] = layer['+str(i)+':'+str(i+height*input_size)+']')
+                #     cnt += 1
+                # print('FL: ', time.time() - start_time)
+                # start_time = time.time()
+            ans = np.matmul(X, self.w)
+                # print('MATMUL: ', time.time() - start_time)
+                # self.w = w
+            return ans
 
         elif self.mode == 'hybrid':
             if len(self.layers) != 2:
                 print('Total layer should be two on hybrid mode!')
                 return
             else:
+                import time
                 # print('process device:', self.idx)
                 size = self.layers[0].shape[1]
                 # print(size)
@@ -78,7 +87,9 @@ class FCBlock:
                 # print(b, e)
                 weights = self.layers[0][:, b:e]
                 # print(weights.shape)
+                tmp = time.time()
                 a1 = relu(np.matmul(X, weights) + self.bias[b: e])
+                # print('a1:', time.time() - tmp)
 
                 # print(a1[-10:])
                 # print(a1.shape)
@@ -89,7 +100,9 @@ class FCBlock:
                 e = int(min((self.idx+1)*math.ceil(size/self.device_num), size))
                 # print(b, e)
                 # print(self.layers[1][b:e, :].shape)
+                tmp = time.time()
                 h = np.matmul(a1, self.layers[1][b:e, :])
+                # print('h:', time.time() - tmp)
                 # print(h[:10])
                 # print(h.shape)
                 return h
