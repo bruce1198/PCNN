@@ -179,7 +179,7 @@ def write_main():
                     or (iter_ <= output_end_idx_in_block and mask_list[block_idx][iter_] != -1 and mask_list[block_idx][iter_+1] == -1):
                     end_index_list.append(iter_)
             if len(begin_index_list) > 1:
-                f.write('\t\t\t\tsend_data = torch.cat((x[:, :, %d:%d, :], x[:, :, %d:%d, :], dim=2))\n' % (\
+                f.write('\t\t\t\tsend_data = torch.cat((x[:, :, %d:%d, :], x[:, :, %d:%d, :]), dim=2)\n' % (\
                     begin_index_list[0]-output_begin_idx_in_block, end_index_list[0]-output_begin_idx_in_block+1,\
                     begin_index_list[1]-output_begin_idx_in_block, end_index_list[1]-output_begin_idx_in_block+1\
                         ))

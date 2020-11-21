@@ -133,19 +133,19 @@ for i in range(7):
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
-				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 7:9, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 7:9, :]), dim=2)
 			elif i == 1:
 				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:4, :]), dim=2) 
 				x = net.b1_forward(x)
-				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :]), dim=2)
 			elif i == 2:
 				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
 				x = net.b2_forward(x)
-				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :]), dim=2)
 			elif i == 3:
 				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
 				x = net.b3_forward(x)
-				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:4, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:4, :]), dim=2)
 			elif i == 4:
 				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:3, :]), dim=2) 
 				x = net.b4_forward(x)

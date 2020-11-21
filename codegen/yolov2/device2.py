@@ -190,7 +190,7 @@ for i in range(8):
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
-				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 8:9, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 8:9, :]), dim=2)
 			elif i == 1:
 				x = torch.cat((x, data[key]), dim=2)
 				x = net.b1_forward(x)
