@@ -65,6 +65,7 @@ class Net(nn.Module):
 		x = self.pool3(x)
 		x = x.view(-1).detach().numpy()
 		fblk = FCBlock('normal', 0, 3)
+		fblk.set_pre_cal_w(self.w)
 		x = fblk.process(x)
 		return x
 

@@ -98,6 +98,7 @@ def write_forward():
                     f.write('\t\tx = x.view(-1).detach().numpy()\n')
                     # f.write('\t\tw%d = self.fc%d.weight.data.numpy().transpose()\n' % (fc_idx, fc_idx))
                     f.write('\t\tfblk = FCBlock(\'normal\', %d, %d)\n' % (device_idx, total_device_num))
+                    f.write('\t\tfblk.set_pre_cal_w(self.w)\n')
                     # f.write('\t\tfblk.set_input_size(%.1f)\n' % (data['output'][i-1]))
                     # f.write('\t\tfblk.append_layer(w%d)\n' % (fc_idx))
                     fc_idx += 1
