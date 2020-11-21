@@ -334,6 +334,7 @@ for model in range(4):
     total_block_num  = len(data['devices'][0].keys())
     
     mask_list = fastmode_calculation()
+    
     for device_idx, device in enumerate(data['devices']):
         num_of_fc_in_block = np.zeros(total_block_num)
         path = {
@@ -342,6 +343,12 @@ for model in range(4):
             2: 'vgg16',
             3: 'vgg19',
         }.get(model)
+
+        import shutil
+        if device_idx == 0:
+            if os.path.exists('codegen/'+path):
+                shutil.rmtree('codegen/'+path)
+                
         if not os.path.exists('codegen/'+path):
             os.mkdir('codegen/'+path)
         with open('codegen/'+path+'/device'+str(device_idx)+'.py', 'w') as f:
@@ -362,5 +369,3 @@ for model in range(4):
             ##################### main ######################
             write_main()
             write_dump()
-            
-        
