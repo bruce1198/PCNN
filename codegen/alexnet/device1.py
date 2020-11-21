@@ -29,6 +29,9 @@ class Net(nn.Module):
 		self.fc2 = nn.Linear(4096, 4096)
 		self.fc3 = nn.Linear(4096, 1000)
 
+	def set_pre_cal_w(self, w):
+		self.w = w
+
 	def b0_forward(self, x):
 		m = nn.ConstantPad2d((2, 2, 0, 0), 0)
 		x = m(x)
@@ -59,10 +62,7 @@ class Net(nn.Module):
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
 		x = x.view(-1).detach().numpy()
-		w1 = self.fc1.weight.data.numpy().transpose()
 		fblk = FCBlock('normal', 1, 3)
-		fblk.set_input_size(6.0)
-		fblk.append_layer(w1)
 		x = fblk.process(x)
 		return x
 
@@ -100,8 +100,43 @@ def recv(sock, n):
 		data.extend(packet)
 	return data
 
+import math
+def pre_cal_weight(idx, device_num, input_size, originw):
+	size = originw.shape[0]
+	size2 = originw.shape[1]
+	input_size = int(input_size)
+	avg = int(math.floor(input_size/device_num))
+	total = avg
+	mod = input_size % device_num
+	start = 0
+	for ii in range(idx):
+		if ii < mod:
+			start += avg+1
+		else:
+			start += avg
+	if idx < mod:
+		total += 1
+	height = total
+	stride = input_size * input_size
+	height1 = int(size * height / input_size)
+	w = np.float32(np.zeros(shape=(height1, size2)))
+	cnt = 0
+	for i in range(start*input_size, size, stride):
+		pos = cnt * height*input_size
+		w[pos:pos+height*input_size, :] = originw[i:i+height*input_size, :]
+		cnt += 1
+	return w
+
+import time
+load = 0
+comm = 0
+cal  = 0
+start = time.time()
 net = Net()
 net.load_state_dict(torch.load(os.path.join(path, 'models', 'alexnet.h5')))
+pre_cal_w = pre_cal_weight(1, 3, 6, net.fc1.weight.data.numpy().transpose())
+net.set_pre_cal_w(pre_cal_w)
+load = time.time() - start
 
 
 import socket
@@ -109,7 +144,7 @@ import socket
 s = socket.socket()
 host = sys.argv[1]
 port = int(sys.argv[2])
-print(host, port)
+# print(host, port)
 
 s.connect((host, port))
 x = None
@@ -121,6 +156,7 @@ for i in range(7):
 		'id': 1,
 		'data': send_data
 	}))
+	comm += time.time() - start
 	if i != 6:
 		try:
 			bytes = recvall(s)
@@ -129,23 +165,25 @@ for i in range(7):
 		except ConnectionResetError:
 			break
 		data = pickle.loads(bytes)
+		comm += time.time() - start
 		key = data['key']
+		start = time.time()
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
-				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 7:9, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 7:9, :]), dim=2)
 			elif i == 1:
 				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:4, :]), dim=2) 
 				x = net.b1_forward(x)
-				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :]), dim=2)
 			elif i == 2:
 				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
 				x = net.b2_forward(x)
-				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :]), dim=2)
 			elif i == 3:
 				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
 				x = net.b3_forward(x)
-				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:4, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:4, :]), dim=2)
 			elif i == 4:
 				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:3, :]), dim=2) 
 				x = net.b4_forward(x)
@@ -155,4 +193,10 @@ for i in range(7):
 				send_data = x
 			# print(x.shape)
 			# do calculate
+		cal += time.time() - start
 s.close()
+print(json.dumps({
+	'load': int(1000*load),
+	'comm': int(1000*comm),
+	'cal': int(1000*cal),
+}))

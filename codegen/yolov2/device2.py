@@ -45,6 +45,9 @@ class Net(nn.Module):
 		self.conv21 = nn.Conv2d(in_channels=1280, out_channels=1024, kernel_size=3, stride=1, padding=0)
 		self.conv22 = nn.Conv2d(in_channels=1024, out_channels=425, kernel_size=1, stride=1, padding=0)
 
+	def set_pre_cal_w(self, w):
+		self.w = w
+
 	def b0_forward(self, x):
 		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
@@ -157,8 +160,41 @@ def recv(sock, n):
 		data.extend(packet)
 	return data
 
+import math
+def pre_cal_weight(idx, device_num, input_size, originw):
+	size = originw.shape[0]
+	size2 = originw.shape[1]
+	input_size = int(input_size)
+	avg = int(math.floor(input_size/device_num))
+	total = avg
+	mod = input_size % device_num
+	start = 0
+	for ii in range(idx):
+		if ii < mod:
+			start += avg+1
+		else:
+			start += avg
+	if idx < mod:
+		total += 1
+	height = total
+	stride = input_size * input_size
+	height1 = int(size * height / input_size)
+	w = np.float32(np.zeros(shape=(height1, size2)))
+	cnt = 0
+	for i in range(start*input_size, size, stride):
+		pos = cnt * height*input_size
+		w[pos:pos+height*input_size, :] = originw[i:i+height*input_size, :]
+		cnt += 1
+	return w
+
+import time
+load = 0
+comm = 0
+cal  = 0
+start = time.time()
 net = Net()
 net.load_state_dict(torch.load(os.path.join(path, 'models', 'yolov2.h5')))
+load = time.time() - start
 
 
 import socket
@@ -166,7 +202,7 @@ import socket
 s = socket.socket()
 host = sys.argv[1]
 port = int(sys.argv[2])
-print(host, port)
+# print(host, port)
 
 s.connect((host, port))
 x = None
@@ -178,6 +214,7 @@ for i in range(8):
 		'id': 2,
 		'data': send_data
 	}))
+	comm += time.time() - start
 	if i != 7:
 		try:
 			bytes = recvall(s)
@@ -186,11 +223,13 @@ for i in range(8):
 		except ConnectionResetError:
 			break
 		data = pickle.loads(bytes)
+		comm += time.time() - start
 		key = data['key']
+		start = time.time()
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
-				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 8:9, :], dim=2))
+				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 8:9, :]), dim=2)
 			elif i == 1:
 				x = torch.cat((x, data[key]), dim=2)
 				x = net.b1_forward(x)
@@ -217,4 +256,10 @@ for i in range(8):
 				send_data = x
 			# print(x.shape)
 			# do calculate
+		cal += time.time() - start
 s.close()
+print(json.dumps({
+	'load': int(1000*load),
+	'comm': int(1000*comm),
+	'cal': int(1000*cal),
+}))

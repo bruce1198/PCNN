@@ -39,6 +39,9 @@ class Net(nn.Module):
 		self.fc2 = nn.Linear(4096, 4096)
 		self.fc3 = nn.Linear(4096, 1000)
 
+	def set_pre_cal_w(self, w):
+		self.w = w
+
 	def b0_forward(self, x):
 		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
 		x = m(x)
@@ -94,10 +97,7 @@ class Net(nn.Module):
 		x = F.relu(self.conv13(x))
 		x = self.pool5(x)
 		x = x.view(-1).detach().numpy()
-		w1 = self.fc1.weight.data.numpy().transpose()
 		fblk = FCBlock('normal', 0, 7)
-		fblk.set_input_size(7.0)
-		fblk.append_layer(w1)
 		x = fblk.process(x)
 		return x
 
@@ -135,8 +135,43 @@ def recv(sock, n):
 		data.extend(packet)
 	return data
 
+import math
+def pre_cal_weight(idx, device_num, input_size, originw):
+	size = originw.shape[0]
+	size2 = originw.shape[1]
+	input_size = int(input_size)
+	avg = int(math.floor(input_size/device_num))
+	total = avg
+	mod = input_size % device_num
+	start = 0
+	for ii in range(idx):
+		if ii < mod:
+			start += avg+1
+		else:
+			start += avg
+	if idx < mod:
+		total += 1
+	height = total
+	stride = input_size * input_size
+	height1 = int(size * height / input_size)
+	w = np.float32(np.zeros(shape=(height1, size2)))
+	cnt = 0
+	for i in range(start*input_size, size, stride):
+		pos = cnt * height*input_size
+		w[pos:pos+height*input_size, :] = originw[i:i+height*input_size, :]
+		cnt += 1
+	return w
+
+import time
+load = 0
+comm = 0
+cal  = 0
+start = time.time()
 net = Net()
 net.load_state_dict(torch.load(os.path.join(path, 'models', 'vgg16.h5')))
+pre_cal_w = pre_cal_weight(0, 7, 0, net.fc1.weight.data.numpy().transpose())
+net.set_pre_cal_w(pre_cal_w)
+load = time.time() - start
 
 
 import socket
@@ -144,7 +179,7 @@ import socket
 s = socket.socket()
 host = sys.argv[1]
 port = int(sys.argv[2])
-print(host, port)
+# print(host, port)
 
 s.connect((host, port))
 x = None
@@ -156,6 +191,7 @@ for i in range(6):
 		'id': 0,
 		'data': send_data
 	}))
+	comm += time.time() - start
 	if i != 5:
 		try:
 			bytes = recvall(s)
@@ -164,7 +200,9 @@ for i in range(6):
 		except ConnectionResetError:
 			break
 		data = pickle.loads(bytes)
+		comm += time.time() - start
 		key = data['key']
+		start = time.time()
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
@@ -186,4 +224,10 @@ for i in range(6):
 				send_data = x
 			# print(x.shape)
 			# do calculate
+		cal += time.time() - start
 s.close()
+print(json.dumps({
+	'load': int(1000*load),
+	'comm': int(1000*comm),
+	'cal': int(1000*cal),
+}))
