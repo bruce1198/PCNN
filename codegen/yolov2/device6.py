@@ -175,7 +175,7 @@ for i in range(8):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
-		'id': 4,
+		'id': 6,
 		'data': send_data
 	}))
 	if i != 7:

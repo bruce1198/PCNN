@@ -30,43 +30,44 @@ class Net(nn.Module):
 		self.fc3 = nn.Linear(4096, 1000)
 
 	def b0_forward(self, x):
-		m = nn.ConstantPad2d((2, 2, 0, 1), 0)
+		m = nn.ConstantPad2d((2, 2, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv1(x))
 		x = self.pool1(x)
 		return x
 
 	def b1_forward(self, x):
-		m = nn.ConstantPad2d((2, 2, 0, 2), 0)
+		m = nn.ConstantPad2d((2, 2, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv2(x))
 		x = self.pool2(x)
 		return x
 
 	def b2_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv3(x))
-		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+		return x
+
+	def b3_forward(self, x):
 		x = m(x)
 		x = F.relu(self.conv4(x))
 		return x
 
-	def b3_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
+	def b4_forward(self, x):
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
 		x = x.view(-1).detach().numpy()
 		w1 = self.fc1.weight.data.numpy().transpose()
-		fblk = FCBlock('normal', 1, 2)
+		fblk = FCBlock('normal', 1, 3)
 		fblk.set_input_size(6.0)
 		fblk.append_layer(w1)
 		x = fblk.process(x)
 		return x
 
-	def b4_forward(self, x):
-		fblk = FCBlock('hybrid', 1, 2)
+	def b5_forward(self, x):
+		fblk = FCBlock('hybrid', 1, 3)
 		fblk.set_bias(self.fc2.bias.detach().numpy())
 		w2 = self.fc2.weight.data.numpy().transpose()
 		w3 = self.fc3.weight.data.numpy().transpose()
@@ -113,14 +114,14 @@ print(host, port)
 s.connect((host, port))
 x = None
 send_data = None
-for i in range(6):
+for i in range(7):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
 		'id': 1,
 		'data': send_data
 	}))
-	if i != 5:
+	if i != 6:
 		try:
 			bytes = recvall(s)
 			if bytes is None:
@@ -132,21 +133,25 @@ for i in range(6):
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
-				send_data = x[:, :, 0:3, :]
+				send_data = torch.cat((x[:, :, 0:4, :], x[:, :, 7:9, :], dim=2))
 			elif i == 1:
-				x = torch.cat((data[key], x), dim=2)
+				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:4, :]), dim=2) 
 				x = net.b1_forward(x)
-				send_data = x[:, :, 0:2, :]
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :], dim=2))
 			elif i == 2:
-				x = torch.cat((data[key], x), dim=2)
+				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
 				x = net.b2_forward(x)
-				send_data = x[:, :, 0:1, :]
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 3:4, :], dim=2))
 			elif i == 3:
-				x = torch.cat((data[key], x), dim=2)
+				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
 				x = net.b3_forward(x)
-				send_data = x
+				send_data = torch.cat((x[:, :, 0:1, :], x[:, :, 2:4, :], dim=2))
 			elif i == 4:
-				x = net.b4_forward(data[key])
+				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:3, :]), dim=2) 
+				x = net.b4_forward(x)
+				send_data = x
+			elif i == 5:
+				x = net.b5_forward(data[key])
 				send_data = x
 			# print(x.shape)
 			# do calculate

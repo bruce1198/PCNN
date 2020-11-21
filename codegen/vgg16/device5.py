@@ -80,9 +80,11 @@ class Net(nn.Module):
 		return x
 
 	def b2_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv11(x))
+		return x
+
+	def b3_forward(self, x):
 		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv12(x))
@@ -98,7 +100,7 @@ class Net(nn.Module):
 		x = fblk.process(x)
 		return x
 
-	def b3_forward(self, x):
+	def b4_forward(self, x):
 		fblk = FCBlock('hybrid', 5, 7)
 		fblk.set_bias(self.fc2.bias.detach().numpy())
 		w2 = self.fc2.weight.data.numpy().transpose()
@@ -146,14 +148,14 @@ print(host, port)
 s.connect((host, port))
 x = None
 send_data = None
-for i in range(5):
+for i in range(6):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
 		'id': 5,
 		'data': send_data
 	}))
-	if i != 4:
+	if i != 5:
 		try:
 			bytes = recvall(s)
 			if bytes is None:
@@ -171,11 +173,15 @@ for i in range(5):
 				x = net.b1_forward(x)
 				send_data = x[:, :, 0:2, :]
 			elif i == 2:
-				x = torch.cat((data[key][:, :, 0:3, :], x, data[key][:, :, 3:5, :]), dim=2) 
+				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
 				x = net.b2_forward(x)
-				send_data = x
+				send_data = x[:, :, 0:2, :]
 			elif i == 3:
-				x = net.b3_forward(data[key])
+				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:4, :]), dim=2) 
+				x = net.b3_forward(x)
+				send_data = x
+			elif i == 4:
+				x = net.b4_forward(data[key])
 				send_data = x
 			# print(x.shape)
 			# do calculate

@@ -1,7 +1,7 @@
 total_device_num=10
 FLOPs_abbr = 13.6
 FLOPs_of_device=(FLOPs_abbr*1000000000)
-bw_abbr = 100
+bw_abbr = 200
 transmission_speed=(bw_abbr/8*1000000)
 
 sheet_num=0

@@ -30,46 +30,46 @@ class Net(nn.Module):
 		self.fc3 = nn.Linear(4096, 1000)
 
 	def b0_forward(self, x):
-		m = nn.ConstantPad2d((2, 2, 2, 0), 0)
+		m = nn.ConstantPad2d((2, 2, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv1(x))
 		x = self.pool1(x)
 		return x
 
 	def b1_forward(self, x):
-		m = nn.ConstantPad2d((2, 2, 2, 0), 0)
+		m = nn.ConstantPad2d((2, 2, 0, 2), 0)
 		x = m(x)
 		x = F.relu(self.conv2(x))
 		x = self.pool2(x)
 		return x
 
 	def b2_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv3(x))
 		return x
 
 	def b3_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv4(x))
 		return x
 
 	def b4_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
 		x = x.view(-1).detach().numpy()
 		w1 = self.fc1.weight.data.numpy().transpose()
-		fblk = FCBlock('normal', 0, 3)
+		fblk = FCBlock('normal', 2, 3)
 		fblk.set_input_size(6.0)
 		fblk.append_layer(w1)
 		x = fblk.process(x)
 		return x
 
 	def b5_forward(self, x):
-		fblk = FCBlock('hybrid', 0, 3)
+		fblk = FCBlock('hybrid', 2, 3)
 		fblk.set_bias(self.fc2.bias.detach().numpy())
 		w2 = self.fc2.weight.data.numpy().transpose()
 		w3 = self.fc3.weight.data.numpy().transpose()
@@ -120,7 +120,7 @@ for i in range(7):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
-		'id': 0,
+		'id': 2,
 		'data': send_data
 	}))
 	if i != 6:
@@ -135,21 +135,21 @@ for i in range(7):
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
-				send_data = x[:, :, 8:9, :]
+				send_data = x[:, :, 0:3, :]
 			elif i == 1:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b1_forward(x)
-				send_data = x[:, :, 4:5, :]
+				send_data = x[:, :, 0:1, :]
 			elif i == 2:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b2_forward(x)
-				send_data = x[:, :, 4:5, :]
+				send_data = x[:, :, 0:1, :]
 			elif i == 3:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b3_forward(x)
-				send_data = x[:, :, 3:5, :]
+				send_data = x[:, :, 0:1, :]
 			elif i == 4:
-				x = torch.cat((x, data[key]), dim=2)
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b4_forward(x)
 				send_data = x
 			elif i == 5:

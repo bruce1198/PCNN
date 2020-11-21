@@ -86,9 +86,6 @@ class Net(nn.Module):
 		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv10(x))
-		return x
-
-	def b3_forward(self, x):
 		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv11(x))
@@ -101,7 +98,7 @@ class Net(nn.Module):
 		x = self.pool5(x)
 		return x
 
-	def b4_forward(self, x):
+	def b3_forward(self, x):
 		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv14(x))
@@ -110,7 +107,7 @@ class Net(nn.Module):
 		x = F.relu(self.conv15(x))
 		return x
 
-	def b5_forward(self, x):
+	def b4_forward(self, x):
 		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv16(x))
@@ -119,13 +116,16 @@ class Net(nn.Module):
 		x = F.relu(self.conv17(x))
 		return x
 
-	def b6_forward(self, x):
+	def b5_forward(self, x):
 		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv18(x))
 		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv19(x))
+		return x
+
+	def b6_forward(self, x):
 		m = nn.ConstantPad2d((1, 1, 1, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv20(x))
@@ -194,27 +194,27 @@ for i in range(8):
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
-				send_data = x[:, :, 12:13, :]
+				send_data = x[:, :, 8:9, :]
 			elif i == 1:
 				x = torch.cat((x, data[key]), dim=2)
 				x = net.b1_forward(x)
-				send_data = x[:, :, 6:7, :]
+				send_data = x[:, :, 3:5, :]
 			elif i == 2:
 				x = torch.cat((x, data[key]), dim=2)
 				x = net.b2_forward(x)
-				send_data = x[:, :, 6:7, :]
+				send_data = x[:, :, 2:3, :]
 			elif i == 3:
 				x = torch.cat((x, data[key]), dim=2)
 				x = net.b3_forward(x)
-				send_data = x[:, :, 3:4, :]
+				send_data = x[:, :, 2:3, :]
 			elif i == 4:
 				x = torch.cat((x, data[key]), dim=2)
 				x = net.b4_forward(x)
-				send_data = x[:, :, 3:4, :]
+				send_data = x[:, :, 1:3, :]
 			elif i == 5:
 				x = torch.cat((x, data[key]), dim=2)
 				x = net.b5_forward(x)
-				send_data = x[:, :, 0:4, :]
+				send_data = x[:, :, 1:3, :]
 			elif i == 6:
 				x = torch.cat((x, data[key]), dim=2)
 				x = net.b6_forward(x)

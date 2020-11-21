@@ -166,10 +166,12 @@ def write_job():
                         or (iter_ <= output_end_idx_in_block and mask_list[block_idx-1][iter_] != -1 and mask_list[block_idx-1][iter_+1] == -1):
                         end_index_list.append(iter_)
                 if len(begin_index_list) > 1:
-                    f.write('\t\t\t\t\t\tx[:, :, %d: %d, :] = data_from_device[:, :, %d:%d, :]\n' % (begin_index_list[0], end_index_list[0], \
-                        begin_index_list[0]-output_begin_idx_in_block, end_index_list[0]-output_begin_idx_in_block+1))
-                    f.write('\t\t\t\t\t\tx[:, :, %d: %d, :] = data_from_device[:, :, %d:%d, :]\n' % (begin_index_list[1], end_index_list[1], \
-                        begin_index_list[1]-output_begin_idx_in_block, end_index_list[1]-output_begin_idx_in_block+1))
+                    len_upper =  end_index_list[0] - begin_index_list[0] + 1
+                    len_lower =  end_index_list[1] - begin_index_list[1] + 1 
+                    f.write('\t\t\t\t\t\tx[:, :, %d: %d, :] = data_from_device[:, :, %d:%d, :]\n' % (begin_index_list[0], end_index_list[0]+1, \
+                        0, len_upper))
+                    f.write('\t\t\t\t\t\tx[:, :, %d: %d, :] = data_from_device[:, :, %d:%d, :]\n' % (begin_index_list[1], end_index_list[1]+1, \
+                        len_upper, len_upper+len_lower))
                 else:
                     f.write('\t\t\t\t\t\tx[:, :, %d: %d, :] = data_from_device\n' % \
                         (begin_index_list[0], end_index_list[0]+1))

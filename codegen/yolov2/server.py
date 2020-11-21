@@ -122,127 +122,156 @@ def job(conn, condition):
 					if cnt == 1:
 						x = torch.ones(1, 128, 76, 76)
 					if idx == 0:
-						x[:, :, 12: 13, :] = data_from_device
+						x[:, :, 8: 9, :] = data_from_device
 					if idx == 1:
-						x[:, :, 13: 15, :] = data_from_device[:, :, 0:3, :]
-						x[:, :, 25: 25, :] = data_from_device[:, :, 12:13, :]
+						x[:, :, 9: 12, :] = data_from_device[:, :, 0:3, :]
+						x[:, :, 17: 18, :] = data_from_device[:, :, 3:4, :]
 					if idx == 2:
-						x[:, :, 26: 29, :] = data_from_device[:, :, 0:4, :]
-						x[:, :, 38: 38, :] = data_from_device[:, :, 12:13, :]
+						x[:, :, 18: 22, :] = data_from_device[:, :, 0:4, :]
+						x[:, :, 26: 27, :] = data_from_device[:, :, 4:5, :]
 					if idx == 3:
-						x[:, :, 39: 41, :] = data_from_device[:, :, 0:3, :]
-						x[:, :, 50: 51, :] = data_from_device[:, :, 11:13, :]
+						x[:, :, 27: 30, :] = data_from_device[:, :, 0:3, :]
+						x[:, :, 34: 36, :] = data_from_device[:, :, 3:5, :]
 					if idx == 4:
-						x[:, :, 52: 53, :] = data_from_device[:, :, 0:2, :]
-						x[:, :, 62: 63, :] = data_from_device[:, :, 10:12, :]
+						x[:, :, 36: 38, :] = data_from_device[:, :, 0:2, :]
+						x[:, :, 42: 44, :] = data_from_device[:, :, 2:4, :]
 					if idx == 5:
-						x[:, :, 64: 66, :] = data_from_device
+						x[:, :, 44: 46, :] = data_from_device[:, :, 0:2, :]
+						x[:, :, 50: 52, :] = data_from_device[:, :, 2:4, :]
+					if idx == 6:
+						x[:, :, 52: 54, :] = data_from_device[:, :, 0:2, :]
+						x[:, :, 58: 60, :] = data_from_device[:, :, 2:4, :]
+					if idx == 7:
+						x[:, :, 60: 62, :] = data_from_device[:, :, 0:2, :]
+						x[:, :, 66: 68, :] = data_from_device[:, :, 2:4, :]
+					if idx == 8:
+						x[:, :, 68: 70, :] = data_from_device
 				elif block_id == 2:
 					if cnt == 1:
 						x = torch.ones(1, 256, 38, 38)
 					if idx == 0:
-						x[:, :, 6: 7, :] = data_from_device
+						x[:, :, 3: 5, :] = data_from_device
 					if idx == 1:
-						x[:, :, 7: 7, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 13: 13, :] = data_from_device[:, :, 6:7, :]
+						x[:, :, 5: 10, :] = data_from_device
 					if idx == 2:
-						x[:, :, 14: 14, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 19: 19, :] = data_from_device[:, :, 5:6, :]
+						x[:, :, 10: 14, :] = data_from_device
 					if idx == 3:
-						x[:, :, 20: 20, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 25: 25, :] = data_from_device[:, :, 5:6, :]
+						x[:, :, 14: 18, :] = data_from_device
 					if idx == 4:
-						x[:, :, 26: 26, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 31: 31, :] = data_from_device[:, :, 5:6, :]
+						x[:, :, 18: 22, :] = data_from_device
 					if idx == 5:
-						x[:, :, 32: 33, :] = data_from_device
+						x[:, :, 22: 26, :] = data_from_device
+					if idx == 6:
+						x[:, :, 26: 30, :] = data_from_device
+					if idx == 7:
+						x[:, :, 30: 34, :] = data_from_device
+					if idx == 8:
+						x[:, :, 34: 37, :] = data_from_device
 				elif block_id == 3:
 					if cnt == 1:
-						x = torch.ones(1, 256, 38, 38)
+						x = torch.ones(1, 512, 19, 19)
 					if idx == 0:
-						x[:, :, 6: 7, :] = data_from_device
+						x[:, :, 2: 3, :] = data_from_device
 					if idx == 1:
-						x[:, :, 7: 9, :] = data_from_device[:, :, 0:3, :]
-						x[:, :, 12: 13, :] = data_from_device[:, :, 5:7, :]
+						x[:, :, 3: 5, :] = data_from_device
 					if idx == 2:
-						x[:, :, 14: 15, :] = data_from_device[:, :, 0:2, :]
-						x[:, :, 18: 19, :] = data_from_device[:, :, 4:6, :]
+						x[:, :, 5: 7, :] = data_from_device
 					if idx == 3:
-						x[:, :, 20: 21, :] = data_from_device[:, :, 0:2, :]
-						x[:, :, 24: 25, :] = data_from_device[:, :, 4:6, :]
+						x[:, :, 7: 9, :] = data_from_device
 					if idx == 4:
-						x[:, :, 26: 27, :] = data_from_device[:, :, 0:2, :]
-						x[:, :, 30: 31, :] = data_from_device[:, :, 4:6, :]
+						x[:, :, 9: 11, :] = data_from_device
 					if idx == 5:
-						x[:, :, 32: 34, :] = data_from_device
+						x[:, :, 11: 13, :] = data_from_device
+					if idx == 6:
+						x[:, :, 13: 15, :] = data_from_device
+					if idx == 7:
+						x[:, :, 15: 17, :] = data_from_device
+					if idx == 8:
+						x[:, :, 17: 18, :] = data_from_device
 				elif block_id == 4:
 					if cnt == 1:
 						x = torch.ones(1, 512, 19, 19)
 					if idx == 0:
-						x[:, :, 3: 4, :] = data_from_device
+						x[:, :, 2: 3, :] = data_from_device
 					if idx == 1:
-						x[:, :, 4: 4, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 6: 6, :] = data_from_device[:, :, 2:3, :]
+						x[:, :, 3: 5, :] = data_from_device
 					if idx == 2:
-						x[:, :, 7: 7, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 9: 9, :] = data_from_device[:, :, 2:3, :]
+						x[:, :, 5: 7, :] = data_from_device
 					if idx == 3:
-						x[:, :, 10: 10, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 12: 12, :] = data_from_device[:, :, 2:3, :]
+						x[:, :, 7: 9, :] = data_from_device
 					if idx == 4:
-						x[:, :, 13: 13, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 15: 15, :] = data_from_device[:, :, 2:3, :]
+						x[:, :, 9: 11, :] = data_from_device
 					if idx == 5:
-						x[:, :, 16: 17, :] = data_from_device
+						x[:, :, 11: 13, :] = data_from_device
+					if idx == 6:
+						x[:, :, 13: 15, :] = data_from_device
+					if idx == 7:
+						x[:, :, 15: 17, :] = data_from_device
+					if idx == 8:
+						x[:, :, 17: 18, :] = data_from_device
 				elif block_id == 5:
 					if cnt == 1:
 						x = torch.ones(1, 512, 19, 19)
 					if idx == 0:
-						x[:, :, 3: 4, :] = data_from_device
+						x[:, :, 1: 3, :] = data_from_device
 					if idx == 1:
-						x[:, :, 4: 4, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 6: 6, :] = data_from_device[:, :, 2:3, :]
+						x[:, :, 3: 5, :] = data_from_device
 					if idx == 2:
-						x[:, :, 7: 7, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 9: 9, :] = data_from_device[:, :, 2:3, :]
+						x[:, :, 5: 7, :] = data_from_device
 					if idx == 3:
-						x[:, :, 10: 10, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 12: 12, :] = data_from_device[:, :, 2:3, :]
+						x[:, :, 7: 9, :] = data_from_device
 					if idx == 4:
-						x[:, :, 13: 13, :] = data_from_device[:, :, 0:1, :]
-						x[:, :, 15: 15, :] = data_from_device[:, :, 2:3, :]
+						x[:, :, 9: 11, :] = data_from_device
 					if idx == 5:
-						x[:, :, 16: 17, :] = data_from_device
+						x[:, :, 11: 13, :] = data_from_device
+					if idx == 6:
+						x[:, :, 13: 15, :] = data_from_device
+					if idx == 7:
+						x[:, :, 15: 17, :] = data_from_device
+					if idx == 8:
+						x[:, :, 17: 19, :] = data_from_device
 				elif block_id == 6:
 					if cnt == 1:
-						x = torch.ones(1, 512, 19, 19)
+						x = torch.ones(1, 1024, 19, 19)
 					if idx == 0:
-						x[:, :, 0: 4, :] = data_from_device
+						x[:, :, 1: 3, :] = data_from_device
 					if idx == 1:
-						x[:, :, 4: 7, :] = data_from_device
+						x[:, :, 3: 5, :] = data_from_device
 					if idx == 2:
-						x[:, :, 7: 10, :] = data_from_device
+						x[:, :, 5: 7, :] = data_from_device
 					if idx == 3:
-						x[:, :, 10: 13, :] = data_from_device
+						x[:, :, 7: 9, :] = data_from_device
 					if idx == 4:
-						x[:, :, 13: 16, :] = data_from_device
+						x[:, :, 9: 11, :] = data_from_device
 					if idx == 5:
-						x[:, :, 16: 19, :] = data_from_device
+						x[:, :, 11: 13, :] = data_from_device
+					if idx == 6:
+						x[:, :, 13: 15, :] = data_from_device
+					if idx == 7:
+						x[:, :, 15: 17, :] = data_from_device
+					if idx == 8:
+						x[:, :, 17: 19, :] = data_from_device
 				elif block_id == 7:
 					if cnt == 1:
 						x = torch.ones(1, 425, 19, 19)
 					if idx == 0:
-						x[:, :, 0:4, :] = data_from_device
+						x[:, :, 0:3, :] = data_from_device
 					elif idx == 1:
-						x[:, :, 4:7, :] = data_from_device
+						x[:, :, 3:5, :] = data_from_device
 					elif idx == 2:
-						x[:, :, 7:10, :] = data_from_device
+						x[:, :, 5:7, :] = data_from_device
 					elif idx == 3:
-						x[:, :, 10:13, :] = data_from_device
+						x[:, :, 7:9, :] = data_from_device
 					elif idx == 4:
-						x[:, :, 13:16, :] = data_from_device
+						x[:, :, 9:11, :] = data_from_device
 					elif idx == 5:
-						x[:, :, 16:19, :] = data_from_device
+						x[:, :, 11:13, :] = data_from_device
+					elif idx == 6:
+						x[:, :, 13:15, :] = data_from_device
+					elif idx == 7:
+						x[:, :, 15:17, :] = data_from_device
+					elif idx == 8:
+						x[:, :, 17:19, :] = data_from_device
 			if cnt < device_num:
 				condition.wait()
 			if cnt == device_num:
@@ -254,95 +283,137 @@ def job(conn, condition):
 			# assign data
 			if block_id == 0:
 				if idx == 0:
-					y = x[:, :, 0:115, :]
+					y = x[:, :, 0:83, :]
 				elif idx == 1:
-					y = x[:, :, 93:219, :]
+					y = x[:, :, 61:155, :]
 				elif idx == 2:
-					y = x[:, :, 197:323, :]
+					y = x[:, :, 133:227, :]
 				elif idx == 3:
-					y = x[:, :, 301:427, :]
+					y = x[:, :, 205:299, :]
 				elif idx == 4:
-					y = x[:, :, 405:523, :]
+					y = x[:, :, 277:363, :]
 				elif idx == 5:
-					y = x[:, :, 501:608, :]
+					y = x[:, :, 341:427, :]
+				elif idx == 6:
+					y = x[:, :, 405:491, :]
+				elif idx == 7:
+					y = x[:, :, 469:555, :]
+				elif idx == 8:
+					y = x[:, :, 533:608, :]
 			elif block_id == 1:
 				if idx == 0:
-					y = x[:, :, 13:16, :]
+					y = x[:, :, 9:12, :]
 				elif idx == 1:
-					y = torch.cat((x[:, :, 12:13, :], x[:, :, 26:30, :]), dim=2)
+					y = torch.cat((x[:, :, 8:9, :], x[:, :, 18:22, :]), dim=2)
 				elif idx == 2:
-					y = x[:, :, 39:42, :]
+					y = x[:, :, 27:30, :]
 				elif idx == 3:
-					y = torch.cat((x[:, :, 38:39, :], x[:, :, 52:54, :]), dim=2)
+					y = torch.cat((x[:, :, 26:27, :], x[:, :, 36:38, :]), dim=2)
 				elif idx == 4:
-					y = torch.cat((x[:, :, 50:52, :], x[:, :, 64:66, :]), dim=2)
+					y = torch.cat((x[:, :, 34:36, :], x[:, :, 44:46, :]), dim=2)
 				elif idx == 5:
-					y = x[:, :, 62:64, :]
+					y = torch.cat((x[:, :, 42:44, :], x[:, :, 52:54, :]), dim=2)
+				elif idx == 6:
+					y = torch.cat((x[:, :, 50:52, :], x[:, :, 60:62, :]), dim=2)
+				elif idx == 7:
+					y = torch.cat((x[:, :, 58:60, :], x[:, :, 68:70, :]), dim=2)
+				elif idx == 8:
+					y = x[:, :, 66:68, :]
 			elif block_id == 2:
 				if idx == 0:
-					y = x[:, :, 7:8, :]
+					y = x[:, :, 5:9, :]
 				elif idx == 1:
-					y = torch.cat((x[:, :, 6:7, :], x[:, :, 14:15, :]), dim=2)
+					y = torch.cat((x[:, :, 3:5, :], x[:, :, 10:13, :]), dim=2)
 				elif idx == 2:
-					y = torch.cat((x[:, :, 13:14, :], x[:, :, 20:21, :]), dim=2)
+					y = torch.cat((x[:, :, 7:10, :], x[:, :, 14:17, :]), dim=2)
 				elif idx == 3:
-					y = torch.cat((x[:, :, 19:20, :], x[:, :, 26:27, :]), dim=2)
+					y = torch.cat((x[:, :, 11:14, :], x[:, :, 18:21, :]), dim=2)
 				elif idx == 4:
-					y = torch.cat((x[:, :, 25:26, :], x[:, :, 32:33, :]), dim=2)
+					y = torch.cat((x[:, :, 15:18, :], x[:, :, 22:25, :]), dim=2)
 				elif idx == 5:
-					y = x[:, :, 31:32, :]
+					y = torch.cat((x[:, :, 19:22, :], x[:, :, 26:29, :]), dim=2)
+				elif idx == 6:
+					y = torch.cat((x[:, :, 23:26, :], x[:, :, 30:33, :]), dim=2)
+				elif idx == 7:
+					y = torch.cat((x[:, :, 27:30, :], x[:, :, 34:37, :]), dim=2)
+				elif idx == 8:
+					y = x[:, :, 31:34, :]
 			elif block_id == 3:
 				if idx == 0:
-					y = x[:, :, 7:10, :]
+					y = x[:, :, 3:4, :]
 				elif idx == 1:
-					y = torch.cat((x[:, :, 6:7, :], x[:, :, 14:16, :]), dim=2)
+					y = torch.cat((x[:, :, 2:3, :], x[:, :, 5:6, :]), dim=2)
 				elif idx == 2:
-					y = torch.cat((x[:, :, 12:14, :], x[:, :, 20:22, :]), dim=2)
+					y = torch.cat((x[:, :, 4:5, :], x[:, :, 7:8, :]), dim=2)
 				elif idx == 3:
-					y = torch.cat((x[:, :, 18:20, :], x[:, :, 26:28, :]), dim=2)
+					y = torch.cat((x[:, :, 6:7, :], x[:, :, 9:10, :]), dim=2)
 				elif idx == 4:
-					y = torch.cat((x[:, :, 24:26, :], x[:, :, 32:34, :]), dim=2)
+					y = torch.cat((x[:, :, 8:9, :], x[:, :, 11:12, :]), dim=2)
 				elif idx == 5:
-					y = x[:, :, 30:32, :]
+					y = torch.cat((x[:, :, 10:11, :], x[:, :, 13:14, :]), dim=2)
+				elif idx == 6:
+					y = torch.cat((x[:, :, 12:13, :], x[:, :, 15:16, :]), dim=2)
+				elif idx == 7:
+					y = torch.cat((x[:, :, 14:15, :], x[:, :, 17:18, :]), dim=2)
+				elif idx == 8:
+					y = x[:, :, 16:17, :]
 			elif block_id == 4:
 				if idx == 0:
-					y = x[:, :, 4:5, :]
+					y = x[:, :, 3:4, :]
 				elif idx == 1:
-					y = torch.cat((x[:, :, 3:4, :], x[:, :, 7:8, :]), dim=2)
+					y = torch.cat((x[:, :, 2:3, :], x[:, :, 5:6, :]), dim=2)
 				elif idx == 2:
-					y = torch.cat((x[:, :, 6:7, :], x[:, :, 10:11, :]), dim=2)
+					y = torch.cat((x[:, :, 4:5, :], x[:, :, 7:8, :]), dim=2)
 				elif idx == 3:
-					y = torch.cat((x[:, :, 9:10, :], x[:, :, 13:14, :]), dim=2)
+					y = torch.cat((x[:, :, 6:7, :], x[:, :, 9:10, :]), dim=2)
 				elif idx == 4:
-					y = torch.cat((x[:, :, 12:13, :], x[:, :, 16:17, :]), dim=2)
+					y = torch.cat((x[:, :, 8:9, :], x[:, :, 11:12, :]), dim=2)
 				elif idx == 5:
-					y = x[:, :, 15:16, :]
+					y = torch.cat((x[:, :, 10:11, :], x[:, :, 13:14, :]), dim=2)
+				elif idx == 6:
+					y = torch.cat((x[:, :, 12:13, :], x[:, :, 15:16, :]), dim=2)
+				elif idx == 7:
+					y = torch.cat((x[:, :, 14:15, :], x[:, :, 17:18, :]), dim=2)
+				elif idx == 8:
+					y = x[:, :, 16:17, :]
 			elif block_id == 5:
 				if idx == 0:
-					y = x[:, :, 4:5, :]
+					y = x[:, :, 3:5, :]
 				elif idx == 1:
-					y = torch.cat((x[:, :, 3:4, :], x[:, :, 7:8, :]), dim=2)
+					y = torch.cat((x[:, :, 1:3, :], x[:, :, 5:7, :]), dim=2)
 				elif idx == 2:
-					y = torch.cat((x[:, :, 6:7, :], x[:, :, 10:11, :]), dim=2)
+					y = torch.cat((x[:, :, 3:5, :], x[:, :, 7:9, :]), dim=2)
 				elif idx == 3:
-					y = torch.cat((x[:, :, 9:10, :], x[:, :, 13:14, :]), dim=2)
+					y = torch.cat((x[:, :, 5:7, :], x[:, :, 9:11, :]), dim=2)
 				elif idx == 4:
-					y = torch.cat((x[:, :, 12:13, :], x[:, :, 16:17, :]), dim=2)
+					y = torch.cat((x[:, :, 7:9, :], x[:, :, 11:13, :]), dim=2)
 				elif idx == 5:
-					y = x[:, :, 15:16, :]
+					y = torch.cat((x[:, :, 9:11, :], x[:, :, 13:15, :]), dim=2)
+				elif idx == 6:
+					y = torch.cat((x[:, :, 11:13, :], x[:, :, 15:17, :]), dim=2)
+				elif idx == 7:
+					y = torch.cat((x[:, :, 13:15, :], x[:, :, 17:19, :]), dim=2)
+				elif idx == 8:
+					y = x[:, :, 15:17, :]
 			elif block_id == 6:
 				if idx == 0:
-					y = x[:, :, 4:8, :]
+					y = x[:, :, 3:5, :]
 				elif idx == 1:
-					y = torch.cat((x[:, :, 0:4, :], x[:, :, 7:11, :]), dim=2)
+					y = torch.cat((x[:, :, 1:3, :], x[:, :, 5:7, :]), dim=2)
 				elif idx == 2:
-					y = torch.cat((x[:, :, 3:7, :], x[:, :, 10:14, :]), dim=2)
+					y = torch.cat((x[:, :, 3:5, :], x[:, :, 7:9, :]), dim=2)
 				elif idx == 3:
-					y = torch.cat((x[:, :, 6:10, :], x[:, :, 13:17, :]), dim=2)
+					y = torch.cat((x[:, :, 5:7, :], x[:, :, 9:11, :]), dim=2)
 				elif idx == 4:
-					y = torch.cat((x[:, :, 9:13, :], x[:, :, 16:19, :]), dim=2)
+					y = torch.cat((x[:, :, 7:9, :], x[:, :, 11:13, :]), dim=2)
 				elif idx == 5:
-					y = x[:, :, 12:16, :]
+					y = torch.cat((x[:, :, 9:11, :], x[:, :, 13:15, :]), dim=2)
+				elif idx == 6:
+					y = torch.cat((x[:, :, 11:13, :], x[:, :, 15:17, :]), dim=2)
+				elif idx == 7:
+					y = torch.cat((x[:, :, 13:15, :], x[:, :, 17:19, :]), dim=2)
+				elif idx == 8:
+					y = x[:, :, 15:17, :]
 			elif block_id == 7:
 				y = x
 				break

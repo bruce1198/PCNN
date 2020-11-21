@@ -46,89 +46,93 @@ class Net(nn.Module):
 		self.conv22 = nn.Conv2d(in_channels=1024, out_channels=425, kernel_size=1, stride=1, padding=0)
 
 	def b0_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv1(x))
 		x = self.pool1(x)
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv2(x))
 		x = self.pool2(x)
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv3(x))
 		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv4(x))
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv5(x))
 		x = self.pool3(x)
 		return x
 
 	def b1_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv6(x))
 		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv7(x))
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv8(x))
 		x = self.pool4(x)
 		return x
 
 	def b2_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv9(x))
 		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv10(x))
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv11(x))
 		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv12(x))
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv13(x))
 		x = self.pool5(x)
 		return x
 
 	def b3_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv14(x))
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv15(x))
 		return x
 
 	def b4_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv16(x))
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv17(x))
 		return x
 
 	def b5_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv18(x))
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv19(x))
 		return x
 
 	def b6_forward(self, x):
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv20(x))
-		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
+		m = nn.ConstantPad2d((1, 1, 0, 1), 0)
 		x = m(x)
 		x = F.relu(self.conv21(x))
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv22(x))
 		return x
@@ -175,7 +179,7 @@ for i in range(8):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
-		'id': 4,
+		'id': 8,
 		'data': send_data
 	}))
 	if i != 7:
@@ -190,29 +194,29 @@ for i in range(8):
 		if key == 'data':
 			if i == 0:
 				x = net.b0_forward(data[key])
-				send_data = torch.cat((x[:, :, 0:2, :], x[:, :, 6:8, :], dim=2))
+				send_data = x[:, :, 0:2, :]
 			elif i == 1:
-				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:4, :]), dim=2) 
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b1_forward(x)
-				send_data = x[:, :, 0:4, :]
+				send_data = x[:, :, 0:3, :]
 			elif i == 2:
-				x = torch.cat((data[key][:, :, 0:3, :], x, data[key][:, :, 3:6, :]), dim=2) 
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b2_forward(x)
-				send_data = x[:, :, 0:2, :]
+				send_data = x[:, :, 0:1, :]
 			elif i == 3:
-				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b3_forward(x)
-				send_data = x[:, :, 0:2, :]
+				send_data = x[:, :, 0:1, :]
 			elif i == 4:
-				x = torch.cat((data[key][:, :, 0:1, :], x, data[key][:, :, 1:2, :]), dim=2) 
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b4_forward(x)
 				send_data = x[:, :, 0:2, :]
 			elif i == 5:
-				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:4, :]), dim=2) 
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b5_forward(x)
 				send_data = x[:, :, 0:2, :]
 			elif i == 6:
-				x = torch.cat((data[key][:, :, 0:2, :], x, data[key][:, :, 2:4, :]), dim=2) 
+				x = torch.cat((data[key], x), dim=2)
 				x = net.b6_forward(x)
 				send_data = x
 			# print(x.shape)
