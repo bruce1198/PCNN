@@ -105,6 +105,7 @@ class Net(nn.Module):
 		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv14(x))
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv15(x))
 		return x
@@ -113,6 +114,7 @@ class Net(nn.Module):
 		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv16(x))
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv17(x))
 		return x
@@ -121,6 +123,7 @@ class Net(nn.Module):
 		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv18(x))
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv19(x))
 		return x
@@ -132,6 +135,7 @@ class Net(nn.Module):
 		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv21(x))
+		m = nn.ConstantPad2d((0, 0, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv22(x))
 		return x
@@ -208,6 +212,7 @@ s.connect((host, port))
 x = None
 send_data = None
 for i in range(8):
+	start = time.time()
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,

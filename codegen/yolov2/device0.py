@@ -212,6 +212,7 @@ s.connect((host, port))
 x = None
 send_data = None
 for i in range(8):
+	start = time.time()
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,

@@ -83,6 +83,7 @@ class Net(nn.Module):
 		return x
 
 	def b2_forward(self, x):
+		m = nn.ConstantPad2d((1, 1, 0, 0), 0)
 		x = m(x)
 		x = F.relu(self.conv11(x))
 		return x
@@ -184,6 +185,7 @@ s.connect((host, port))
 x = None
 send_data = None
 for i in range(6):
+	start = time.time()
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
