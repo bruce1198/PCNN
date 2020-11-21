@@ -72,6 +72,8 @@ def write_forward():
                         f.write('\t\tm = nn.ConstantPad2d((%d, %d, %d, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(data['padding'][i])))
                     elif device_idx == total_device_num-1:
                         f.write('\t\tm = nn.ConstantPad2d((%d, %d, 0, %d), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(data['padding'][i])))
+                    else:
+                        f.write('\t\tm = nn.ConstantPad2d((%d, %d, 0, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i])))
                 else:
                     if begin_idx_in_layer < 0:
                         f.write('\t\tm = nn.ConstantPad2d((%d, %d, %d, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(abs(begin_idx_in_layer))))
@@ -150,6 +152,7 @@ def write_main():
     f.write('x = None\n')
     f.write('send_data = None\n')
     f.write('for i in range(%d):\n' % (total_block_num+1))
+    f.write('\tstart = time.time()\n')
     f.write('\tsendall(s, pickle.dumps({\n')
     f.write('\t\t\'key\': \'get\',\n')
     f.write('\t\t\'blkId\': i,\n')
@@ -219,11 +222,6 @@ def write_main():
             else:
                 f.write('\t\t\t\tsend_data = x[:, :, %d:%d, :]\n' % \
                     (begin_index_list[0]-output_begin_idx_in_block, end_index_list[0]-output_begin_idx_in_block+1))
-            if(model == 1):
-                # print(output_begin_idx_in_block, output_end_idx_in_block)
-                # print(mask_list[block_idx])
-                # print(begin_index_list, end_index_list)
-                pass
         else:
             f.write('\t\t\t\tsend_data = x\n')
         prev_key = key
