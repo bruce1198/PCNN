@@ -216,7 +216,7 @@ for i in range(8):
 	sendall(s, pickle.dumps({
 		'key': 'get',
 		'blkId': i,
-		'id': 4,
+		'id': 7,
 		'data': send_data
 	}))
 	comm += time.time() - start

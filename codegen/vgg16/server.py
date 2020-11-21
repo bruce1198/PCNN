@@ -133,6 +133,23 @@ def job(conn, condition):
 					if cnt == 1:
 						x = torch.ones(1, 512, 14, 14)
 					if idx == 0:
+						x[:, :, 1: 2, :] = data_from_device
+					if idx == 1:
+						x[:, :, 2: 4, :] = data_from_device
+					if idx == 2:
+						x[:, :, 4: 6, :] = data_from_device
+					if idx == 3:
+						x[:, :, 6: 8, :] = data_from_device
+					if idx == 4:
+						x[:, :, 8: 10, :] = data_from_device
+					if idx == 5:
+						x[:, :, 10: 12, :] = data_from_device
+					if idx == 6:
+						x[:, :, 12: 13, :] = data_from_device
+				elif block_id == 3:
+					if cnt == 1:
+						x = torch.ones(1, 512, 14, 14)
+					if idx == 0:
 						x[:, :, 0: 2, :] = data_from_device
 					if idx == 1:
 						x[:, :, 2: 4, :] = data_from_device
@@ -146,13 +163,13 @@ def job(conn, condition):
 						x[:, :, 10: 12, :] = data_from_device
 					if idx == 6:
 						x[:, :, 12: 14, :] = data_from_device
-				elif block_id == 3:
+				elif block_id == 4:
 					if cnt == 1:
 						x = np.zeros(4096)
 					x += data_from_device
 					if cnt == 7:
 						x = relu(x + net.fc1.bias.detach().numpy())
-				elif block_id == 4:
+				elif block_id == 5:
 					if cnt == 1:
 						x = np.zeros(1000)
 					x += data_from_device
@@ -197,22 +214,37 @@ def job(conn, condition):
 					y = x[:, :, 21:24, :]
 			elif block_id == 2:
 				if idx == 0:
-					y = x[:, :, 2:5, :]
+					y = x[:, :, 2:3, :]
 				elif idx == 1:
-					y = torch.cat((x[:, :, 0:2, :], x[:, :, 4:7, :]), dim=2)
+					y = torch.cat((x[:, :, 1:2, :], x[:, :, 4:5, :]), dim=2)
 				elif idx == 2:
-					y = torch.cat((x[:, :, 1:4, :], x[:, :, 6:9, :]), dim=2)
+					y = torch.cat((x[:, :, 3:4, :], x[:, :, 6:7, :]), dim=2)
 				elif idx == 3:
-					y = torch.cat((x[:, :, 3:6, :], x[:, :, 8:11, :]), dim=2)
+					y = torch.cat((x[:, :, 5:6, :], x[:, :, 8:9, :]), dim=2)
 				elif idx == 4:
-					y = torch.cat((x[:, :, 5:8, :], x[:, :, 10:13, :]), dim=2)
+					y = torch.cat((x[:, :, 7:8, :], x[:, :, 10:11, :]), dim=2)
 				elif idx == 5:
-					y = torch.cat((x[:, :, 7:10, :], x[:, :, 12:14, :]), dim=2)
+					y = torch.cat((x[:, :, 9:10, :], x[:, :, 12:13, :]), dim=2)
 				elif idx == 6:
-					y = x[:, :, 9:12, :]
+					y = x[:, :, 11:12, :]
 			elif block_id == 3:
-					y = x
+				if idx == 0:
+					y = x[:, :, 2:4, :]
+				elif idx == 1:
+					y = torch.cat((x[:, :, 0:2, :], x[:, :, 4:6, :]), dim=2)
+				elif idx == 2:
+					y = torch.cat((x[:, :, 2:4, :], x[:, :, 6:8, :]), dim=2)
+				elif idx == 3:
+					y = torch.cat((x[:, :, 4:6, :], x[:, :, 8:10, :]), dim=2)
+				elif idx == 4:
+					y = torch.cat((x[:, :, 6:8, :], x[:, :, 10:12, :]), dim=2)
+				elif idx == 5:
+					y = torch.cat((x[:, :, 8:10, :], x[:, :, 12:14, :]), dim=2)
+				elif idx == 6:
+					y = x[:, :, 10:12, :]
 			elif block_id == 4:
+					y = x
+			elif block_id == 5:
 				y = x + net.fc3.bias.detach().numpy()
 				break
 			# print('to', idx, y.shape)

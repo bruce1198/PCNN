@@ -20,6 +20,8 @@ def write_relu():
     f.write('\treturn np.maximum(x, 0)\n\n')
 
 def write_init():
+    f.write('\tdef __init__(self):\n')
+    f.write('\t\tsuper(Net, self).__init__()\n')
     conv_idx = 1
     pool_idx = 1
     fc_idx   = 1
@@ -34,6 +36,12 @@ def write_init():
             f.write('\t\tself.fc'+str(fc_idx)+' = nn.Linear('+str(int(data['in_channel'][idx]))+', '+str(int(data['out_channel'][idx]))+')\n')
             fc_idx += 1
     f.write('\n')
+
+def write_set_pre_cal_w():
+    f.write('\tdef set_pre_cal_w(self, w):\n')
+    f.write('\t\tself.w = w\n')
+    f.write('\n')
+
 def write_forward():
     conv_idx = 1
     pool_idx = 1
@@ -64,6 +72,8 @@ def write_forward():
                         f.write('\t\tm = nn.ConstantPad2d((%d, %d, %d, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(data['padding'][i])))
                     elif device_idx == total_device_num-1:
                         f.write('\t\tm = nn.ConstantPad2d((%d, %d, 0, %d), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(data['padding'][i])))
+                    else:
+                        f.write('\t\tm = nn.ConstantPad2d((%d, %d, 0, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i])))
                 else:
                     if begin_idx_in_layer < 0:
                         f.write('\t\tm = nn.ConstantPad2d((%d, %d, %d, 0), 0)\n' % (int(data['padding'][i]), int(data['padding'][i]), int(abs(begin_idx_in_layer))))
@@ -86,10 +96,10 @@ def write_forward():
                 
                 if num_of_fc_in_block[idx] == 1:
                     f.write('\t\tx = x.view(-1).detach().numpy()\n')
-                    f.write('\t\tw%d = self.fc%d.weight.data.numpy().transpose()\n' % (fc_idx, fc_idx))
+                    # f.write('\t\tw%d = self.fc%d.weight.data.numpy().transpose()\n' % (fc_idx, fc_idx))
                     f.write('\t\tfblk = FCBlock(\'normal\', %d, %d)\n' % (device_idx, total_device_num))
-                    f.write('\t\tfblk.set_input_size(%.1f)\n' % (data['output'][i-1]))
-                    f.write('\t\tfblk.append_layer(w%d)\n' % (fc_idx))
+                    # f.write('\t\tfblk.set_input_size(%.1f)\n' % (data['output'][i-1]))
+                    # f.write('\t\tfblk.append_layer(w%d)\n' % (fc_idx))
                     fc_idx += 1
                 elif num_of_fc_in_block[idx] == 2:
                     # f.write('\t\tx = x.view(-1).detach().numpy()\n')
@@ -109,23 +119,47 @@ def write_forward():
         f.write('\n')
 
 def write_main():
+    f.write('import time\n')
+    f.write('load = 0\n')
+    f.write('comm = 0\n')
+    f.write('cal  = 0\n')
+    f.write('start = time.time()\n')
     f.write('net = Net()\n')
-    f.write('net.load_state_dict(torch.load(os.path.join(path, \'models\', \'%s.h5\')))\n\n\n' % (path))
+    f.write('net.load_state_dict(torch.load(os.path.join(path, \'models\', \'%s.h5\')))\n' % (path))
+    # check whether there is fc layer
+    have_fc = False
+    for layer in data['layers']:
+        if layer == 'FL':
+            have_fc = True
+            break
+    # record input size of fc
+    input_size = 0
+    for idx, output in enumerate(data['output']):
+        if output == '':
+            input_size = data['output'][idx-1]
+            break
+    if have_fc == True:
+        f.write('pre_cal_w = pre_cal_weight(%d, %d, %d, net.fc1.weight.data.numpy().transpose())\n' % (device_idx, total_device_num, input_size))
+        f.write('net.set_pre_cal_w(pre_cal_w)\n')
+    f.write('load = time.time() - start\n\n\n')
+
     f.write('import socket\n\n')
     f.write('s = socket.socket()\n')
     f.write('host = sys.argv[1]\n')
     f.write('port = int(sys.argv[2])\n')
-    f.write('print(host, port)\n\n')
+    f.write('# print(host, port)\n\n')
     f.write('s.connect((host, port))\n')
     f.write('x = None\n')
     f.write('send_data = None\n')
     f.write('for i in range(%d):\n' % (total_block_num+1))
+    f.write('\tstart = time.time()\n')
     f.write('\tsendall(s, pickle.dumps({\n')
     f.write('\t\t\'key\': \'get\',\n')
     f.write('\t\t\'blkId\': i,\n')
     f.write('\t\t\'id\': %d,\n' % (device_idx))
     f.write('\t\t\'data\': send_data\n')
     f.write('\t}))\n')
+    f.write('\tcomm += time.time() - start\n')
     f.write('\tif i != %d:\n' % (total_block_num))
     f.write('\t\ttry:\n')
     f.write('\t\t\tbytes = recvall(s)\n')
@@ -134,7 +168,9 @@ def write_main():
     f.write('\t\texcept ConnectionResetError:\n')
     f.write('\t\t\tbreak\n')
     f.write('\t\tdata = pickle.loads(bytes)\n')
+    f.write('\t\tcomm += time.time() - start\n')
     f.write('\t\tkey = data[\'key\']\n')
+    f.write('\t\tstart = time.time()\n')
     f.write('\t\tif key == \'data\':\n')
     # f.write('\t\t\tx = data[key]\n')
     # f.write('\t\t\tprint(x.shape)\n')
@@ -179,18 +215,13 @@ def write_main():
                     or (iter_ <= output_end_idx_in_block and mask_list[block_idx][iter_] != -1 and mask_list[block_idx][iter_+1] == -1):
                     end_index_list.append(iter_)
             if len(begin_index_list) > 1:
-                f.write('\t\t\t\tsend_data = torch.cat((x[:, :, %d:%d, :], x[:, :, %d:%d, :], dim=2))\n' % (\
+                f.write('\t\t\t\tsend_data = torch.cat((x[:, :, %d:%d, :], x[:, :, %d:%d, :]), dim=2)\n' % (\
                     begin_index_list[0]-output_begin_idx_in_block, end_index_list[0]-output_begin_idx_in_block+1,\
                     begin_index_list[1]-output_begin_idx_in_block, end_index_list[1]-output_begin_idx_in_block+1\
                         ))
             else:
                 f.write('\t\t\t\tsend_data = x[:, :, %d:%d, :]\n' % \
                     (begin_index_list[0]-output_begin_idx_in_block, end_index_list[0]-output_begin_idx_in_block+1))
-            if(model == 1):
-                # print(output_begin_idx_in_block, output_end_idx_in_block)
-                # print(mask_list[block_idx])
-                # print(begin_index_list, end_index_list)
-                pass
         else:
             f.write('\t\t\t\tsend_data = x\n')
         prev_key = key
@@ -198,6 +229,7 @@ def write_main():
         
     f.write('\t\t\t# print(x.shape)\n')
     f.write('\t\t\t# do calculate\n')
+    f.write('\t\tcal += time.time() - start\n')
     f.write('s.close()\n')
 
 
@@ -228,6 +260,35 @@ def write_recv():
     f.write('\t\tdata.extend(packet)\n')
     f.write('\treturn data\n\n')
 
+def write_pre_cal_weight():
+    f.write('import math\n')
+    f.write('def pre_cal_weight(idx, device_num, input_size, originw):\n')
+    f.write('\tsize = originw.shape[0]\n')
+    f.write('\tsize2 = originw.shape[1]\n')
+    f.write('\tinput_size = int(input_size)\n')
+    f.write('\tavg = int(math.floor(input_size/device_num))\n')
+    f.write('\ttotal = avg\n')
+    f.write('\tmod = input_size % device_num\n')
+    f.write('\tstart = 0\n')
+    f.write('\tfor ii in range(idx):\n')
+    f.write('\t\tif ii < mod:\n')
+    f.write('\t\t\tstart += avg+1\n')
+    f.write('\t\telse:\n')
+    f.write('\t\t\tstart += avg\n')
+    f.write('\tif idx < mod:\n')
+    f.write('\t\ttotal += 1\n')
+    f.write('\theight = total\n')
+    f.write('\tstride = input_size * input_size\n')
+    f.write('\theight1 = int(size * height / input_size)\n')
+    f.write('\tw = np.float32(np.zeros(shape=(height1, size2)))\n')
+    f.write('\tcnt = 0\n')
+    f.write('\tfor i in range(start*input_size, size, stride):\n')
+    f.write('\t\tpos = cnt * height*input_size\n')
+    f.write('\t\tw[pos:pos+height*input_size, :] = originw[i:i+height*input_size, :]\n')
+    f.write('\t\tcnt += 1\n')
+    f.write('\treturn w\n')
+    f.write('\n')
+
 def fastmode_calculation():
     mask_list = [] # record whether data need to be send
     key_list = []
@@ -255,7 +316,12 @@ def fastmode_calculation():
             mask_list.append(mask)
     return(mask_list)
 
-
+def write_dump():
+    f.write('print(json.dumps({\n')
+    f.write('\t\'load\': int(1000*load),\n')
+    f.write('\t\'comm\': int(1000*comm),\n')
+    f.write('\t\'cal\': int(1000*cal),\n')
+    f.write('}))\n')
 if not os.path.exists('codegen'):
     os.mkdir('codegen')
 
@@ -286,14 +352,15 @@ for model in range(4):
             ######################## write class Net ########################
 
             f.write('class Net(nn.Module):\n')
-            f.write('\tdef __init__(self):\n')
-            f.write('\t\tsuper(Net, self).__init__()\n')
             write_init()
+            write_set_pre_cal_w()
             write_forward()
             write_sendall()
             write_recvall()
             write_recv()
+            write_pre_cal_weight()
             ##################### main ######################
             write_main()
+            write_dump()
             
         
