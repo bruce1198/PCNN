@@ -1,5 +1,5 @@
 models/
-node_modules/
+codegen/
 .DS_Store
 .vscode
 __pycache__
