@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import sys
 
 class Net(nn.Module):
 	def __init__(self):
@@ -29,9 +30,24 @@ class Net(nn.Module):
 		self.conv17 = nn.Conv2d(in_channels=1024, out_channels=512, kernel_size=1, stride=1, padding=0)
 		self.conv18 = nn.Conv2d(in_channels=512, out_channels=1024, kernel_size=3, stride=1, padding=1)
 		self.conv19 = nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, stride=1, padding=1)
-		self.conv20 = nn.Conv2d(in_channels=1024, out_channels=1024, kernel_size=3, stride=1, padding=1)
+		self.conv20 = nn.Conv2d(in_channels=512, out_channels=64, kernel_size=1, stride=1, padding=0)
 		self.conv21 = nn.Conv2d(in_channels=1280, out_channels=1024, kernel_size=3, stride=1, padding=1)
 		self.conv22 = nn.Conv2d(in_channels=1024, out_channels=425, kernel_size=1, stride=1, padding=0)
+
+	def reorg(self, x, num):
+		# reorg => 38 * 38 * 64 => 19 * 19 * 256
+		b, c, h, w = x.size()
+		x = x.view(b, c, int(h/num), num, int(w/num), num).transpose(3,4).contiguous()
+		x = x.view(b, c, int(h/num*w/num), num*num).transpose(2,3).contiguous()
+		x = x.view(b, c, num*num, int(h/num), int(w/num)).transpose(1,2).contiguous()
+		x = x.view(b, num*num*c, int(h/num), int(w/num))
+		return x
+
+	def concat(self, x1, x2):
+		# print(x1.shape)
+		# print(x2.shape)
+		x = torch.cat((x1, x2), dim=1)
+		return x
 
 	def forward(self, x):
 		x = F.relu(self.conv1(x))
@@ -51,6 +67,7 @@ class Net(nn.Module):
 		x = F.relu(self.conv11(x))
 		x = F.relu(self.conv12(x))
 		x = F.relu(self.conv13(x))
+		route16 = x
 		x = self.pool5(x)
 		x = F.relu(self.conv14(x))
 		x = F.relu(self.conv15(x))
@@ -58,13 +75,23 @@ class Net(nn.Module):
 		x = F.relu(self.conv17(x))
 		x = F.relu(self.conv18(x))
 		x = F.relu(self.conv19(x))
+		route24 = x
+		# route [16]
+		x = route16
 		x = F.relu(self.conv20(x))
+		# reorg /2
+		x = self.reorg(x, 2)
+		# route [27 24]
+		x = self.concat(x, route24)
 		x = F.relu(self.conv21(x))
-		x = F.relu(self.conv22(x))
+		x = self.conv22(x)
 		return x
 
 net = Net()
-# torch.save(net.state_dict(), 'models/yolov2')
+if len(sys.argv) == 2:
+    if sys.argv[1] == '-g':
+        torch.save(net.state_dict(), 'models/yolov2')
+        exit(0)
 net.load_state_dict(torch.load('models/yolov2'))
 y = net(torch.ones(1, 3, 608, 608))
 print(y.view(-1).detach().numpy()[:50])
