@@ -60,25 +60,18 @@ class Net(nn.Module):
         x = F.relu(self.conv4(x))
         x = F.relu(self.conv5(x))
         x = self.pool3(x)
-        # x = x.view(-1, 256 * 6 * 6)
         x = x.view(-1).detach().numpy()
-        # w = self.fc1.weight.data.numpy().transpose()
         fblk = FCBlock('normal', 0, 1)
-        # fblk.set_input_size(6.0)
         fblk.set_pre_cal_w(self.w)
-        # start_time = time.time()
         x = relu(fblk.process(x) + self.fc1.bias.detach().numpy())
-        # print('FC1:', time.time() - start_time)
         w1 = self.fc2.weight.data.numpy().transpose()
         w2 = self.fc3.weight.data.numpy().transpose()
         fblk = FCBlock('hybrid', 0, 1)
         fblk.set_bias(self.fc2.bias.detach().numpy())
         fblk.append_layer(w1)
         fblk.append_layer(w2)
-        # # start_time = time.time()
         x = fblk.process(x)
         x += self.fc3.bias.detach().numpy()
-        # print('FC2:', time.time() - start_time)
         return x
 
 if __name__ == "__main__":
@@ -107,7 +100,7 @@ if __name__ == "__main__":
         cnt += 1
     net.set_pre_cal_w(w)
     load_time = time.time() - start_time
-    print(load_time)
+    # print(load_time)
 
     if len(sys.argv) == 2:
         if sys.argv[1] == '-g':
@@ -133,11 +126,11 @@ if __name__ == "__main__":
     start_time = time.time()
     # y = net.forward_origin(x)
     # print(y.view(-1).detach().numpy()[:50])
-    y = net.forward_origin(x).view(-1).detach().numpy()
-    print(y[:50])
+    # y = net.forward_origin(x).view(-1).detach().numpy()
+    # print(y[:50])
     y = net(x)
     # print(y.shape)
-    print(y[:50])
+    # print(y[:50])
     y = softmax(y)
     index = np.argmax(y)
     # index = 0
