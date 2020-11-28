@@ -39,8 +39,9 @@ class Net(nn.Module):
 
     def set_pre_cal_w(self, w):
         self.w = w
+        print(self.w.shape)
 
-    def forward_origin(self, x):
+    def forward(self, x):
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = F.relu(self.conv3(x))
@@ -53,52 +54,11 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
-    def forward(self, x):
-        x = self.pool1(F.relu(self.conv1(x)))
-        x = self.pool2(F.relu(self.conv2(x)))
-        x = F.relu(self.conv3(x))
-        x = F.relu(self.conv4(x))
-        x = F.relu(self.conv5(x))
-        x = self.pool3(x)
-        x = x.view(-1).detach().numpy()
-        fblk = FCBlock('normal', 0, 1)
-        fblk.set_pre_cal_w(self.w)
-        x = relu(fblk.process(x) + self.fc1.bias.detach().numpy())
-        w1 = self.fc2.weight.data.numpy().transpose()
-        w2 = self.fc3.weight.data.numpy().transpose()
-        fblk = FCBlock('hybrid', 0, 1)
-        fblk.set_bias(self.fc2.bias.detach().numpy())
-        fblk.append_layer(w1)
-        fblk.append_layer(w2)
-        x = fblk.process(x)
-        x += self.fc3.bias.detach().numpy()
-        return x
-
 if __name__ == "__main__":
     import math
     start_time = time.time()
     net = Net()
     net.load_state_dict(torch.load(os.path.join(pcnn_path, 'models', 'alexnet.h5')))
-    pre_cal_w = net.fc1.weight.data.numpy().transpose()
-    size = pre_cal_w.shape[0]
-    size2 = pre_cal_w.shape[1]
-    input_size = 6
-    avg = 6
-    total = avg
-    start = 0
-    height = total
-    stride = input_size * input_size
-    # print(size)
-    # print(stride)
-    height1 = int(size * height / input_size)
-    w = np.float32(np.zeros(shape=(height1, size2)))
-    cnt = 0
-    for i in range(start*input_size, size, stride):
-        pos = cnt * height*input_size
-        w[pos:pos+height*input_size, :] = pre_cal_w[i:i+height*input_size, :]
-        # print('w['+str(pos)+':'+str(pos+height*input_size)+'] = layer['+str(i)+':'+str(i+height*input_size)+']')
-        cnt += 1
-    net.set_pre_cal_w(w)
     load_time = time.time() - start_time
     # print(load_time)
 
@@ -131,8 +91,7 @@ if __name__ == "__main__":
     y = net(x)
     # print(y.shape)
     # print(y[:50])
-    y = softmax(y)
-    index = np.argmax(y)
+    index = np.argmax(torch.nn.functional.softmax(y, dim=0).detach().numpy())
     # index = 0
 
     cal_time = time.time() - start_time

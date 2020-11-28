@@ -191,7 +191,7 @@ def write_job():
                 f.write('\t\t\t\t\t\tx[:, :, %d:%d, :] = data_from_device\n' 
                         %(data['padding_info'][device_idx][layer_key[block_idx-1]][number_of_layer_in_block-1][0], data['padding_info'][device_idx][layer_key[block_idx-1]][number_of_layer_in_block-1][1]+1))
         elif data['layers'][end] == 'FL':
-            f.write('\t\t\t\t\t\tx = np.zeros(%d)\n' % (data['out_channel'][end]))
+            f.write('\t\t\t\t\t\tx = torch.zeros(%d)\n' % (data['out_channel'][end]))
             f.write('\t\t\t\t\tx += data_from_device\n')
             if end != len(fc_idx)-1:
                 f.write('\t\t\t\t\tif cnt == %d:\n' % (total_device_num))
@@ -290,8 +290,7 @@ def write_socket():
     f.write('\t\t\tt.join()\n')
     f.write('\t\t# print(y[:50])\n')
     f.write('\t\t# print(y.view(-1).detach().numpy()[:50])\n')
-    f.write('\t\ty = softmax(y)\n')
-    f.write('\t\tindex = np.argmax(y)\n')
+    f.write('\t\tindex = np.argmax(torch.nn.functional.softmax(y, dim=0).detach().numpy())\n')
     f.write('\t\t# print(index)\n')
     f.write('\texcept error:\n')
     f.write('\t\ts.close()\n')
