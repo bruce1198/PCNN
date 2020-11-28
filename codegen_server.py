@@ -195,7 +195,7 @@ def write_job():
             f.write('\t\t\t\t\tx += data_from_device\n')
             if end != len(fc_idx)-1:
                 f.write('\t\t\t\t\tif cnt == %d:\n' % (total_device_num))
-                f.write('\t\t\t\t\t\tx = relu(x + net.fc%d.bias.detach().numpy())\n' % (fc_idx[end]))
+                f.write('\t\t\t\t\t\tx = F.relu(x + net.fc%d.bias)\n' % (fc_idx[end]))
  
     f.write('\t\t\tif cnt < device_num:\n')    
     f.write('\t\t\t\tcondition.wait()\n')  
@@ -249,7 +249,7 @@ def write_job():
             if data['layers'][end] == 'conv' or data['layers'][end] == 'pool':
                 f.write('\t\t\t\ty = x\n')
             elif data['layers'][end] == 'FL':
-                f.write('\t\t\t\ty = x + net.fc%d.bias.detach().numpy()\n' % fc_idx[end])
+                f.write('\t\t\t\ty = x + net.fc%d.bias\n' % fc_idx[end])
             f.write('\t\t\t\tbreak\n')
     f.write('\t\t\t# print(\'to\', idx, y.shape)\n')
     f.write('\t\t\tsendall(conn, pickle.dumps({\n')
