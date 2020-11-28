@@ -13,7 +13,7 @@ def write_header():
     f.write('from os.path import dirname, abspath\n\n')
     f.write('path = dirname(dirname(dirname(abspath(__file__))))\n')
     f.write('sys.path.insert(0, path)\n')
-    f.write('from fl import FCBlock\n\n')
+    f.write('from pre_cal import *\n\n')
 
 def write_relu():
     f.write('def relu(x):\n')
@@ -39,7 +39,16 @@ def write_init():
 
 def write_set_pre_cal_w():
     f.write('\tdef set_pre_cal_w(self, w):\n')
-    f.write('\t\tself.w = w\n')
+    f.write('\t\tself.fc1 = nn.Linear(w.shape[1], w.shape[0])\n')
+    f.write('\t\tself.fc1.weight = nn.Parameter(w)\n')
+    f.write('\n')
+
+def write_set_pre_cal_w2():
+    f.write('\tdef set_pre_cal_w2(self, w):\n')
+    f.write('\t\tself.fc2 = nn.Linear(w[\'w1\'].shape[1], w[\'w1\'].shape[0])\n')
+    f.write('\t\tself.fc2.weight = nn.Parameter(w[\'w1\'])\n')
+    f.write('\t\tself.fc3 = nn.Linear(w[\'w2\'].shape[1], w[\'w2\'].shape[0])\n')
+    f.write('\t\tself.fc3.weight = nn.Parameter(w[\'w2\'])\n')
     f.write('\n')
 
 def write_forward():
@@ -95,25 +104,15 @@ def write_forward():
 
                 
                 if num_of_fc_in_block[idx] == 1:
-                    f.write('\t\tx = x.view(-1).detach().numpy()\n')
-                    # f.write('\t\tw%d = self.fc%d.weight.data.numpy().transpose()\n' % (fc_idx, fc_idx))
-                    f.write('\t\tfblk = FCBlock(\'normal\', %d, %d)\n' % (device_idx, total_device_num))
-                    f.write('\t\tfblk.set_pre_cal_w(self.w)\n')
-                    # f.write('\t\tfblk.set_input_size(%.1f)\n' % (data['output'][i-1]))
-                    # f.write('\t\tfblk.append_layer(w%d)\n' % (fc_idx))
+                    f.write('\t\tx = x.view(-1)\n')
+                    f.write('\t\tx = self.fc%d(x)\n' % fc_idx)
                     fc_idx += 1
                 elif num_of_fc_in_block[idx] == 2:
                     # f.write('\t\tx = x.view(-1).detach().numpy()\n')
-                    f.write('\t\tfblk = FCBlock(\'hybrid\', %d, %d)\n' % (device_idx, total_device_num))
-                    for weight_idx in range(2):
-                        if weight_idx == 0:
-                            f.write('\t\tfblk.set_bias(self.fc2.bias.detach().numpy())\n')
-                        f.write('\t\tw%d = self.fc%d.weight.data.numpy().transpose()\n' % (fc_idx + weight_idx, fc_idx + weight_idx))
-                        
-                    for weight_idx in range(2):
-                        f.write('\t\tfblk.append_layer(w%d)\n' % (fc_idx + weight_idx))
-                    fc_idx += 2
-                f.write('\t\tx = fblk.process(x)\n')
+                    f.write('\t\tx = F.relu(self.fc%d(x))\n' % fc_idx)
+                    fc_idx += 1
+                    f.write('\t\tx = self.fc%d(x)\n' % fc_idx)
+                    fc_idx += 1
                 
             layer_idx_in_block += 1
         f.write('\t\treturn x\n')
@@ -140,8 +139,13 @@ def write_main():
             input_size = data['output'][idx-1]
             break
     if have_fc == True:
-        f.write('pre_cal_w = pre_cal_weight(%d, %d, %d, net.fc1.weight.data.numpy().transpose())\n' % (device_idx, total_device_num, input_size))
-        f.write('net.set_pre_cal_w(pre_cal_w)\n')
+        for idx in range(total_block_num):
+            if num_of_fc_in_block[idx] == 1:   
+                f.write('pre_cal_w = pre_cal_weight(%d, %d, %d, net.fc1.weight.transpose(0, 1))\n' % (device_idx, total_device_num, input_size))
+                f.write('net.set_pre_cal_w(pre_cal_w)\n')
+            elif num_of_fc_in_block[idx] == 2:
+                f.write('pre_cal_w2 = pre_cal_weight2(%d, %d, net.fc2.weight.transpose(0, 1), net.fc3.weight.transpose(0, 1))\n' % (device_idx, total_device_num))
+                f.write('net.set_pre_cal_w2(pre_cal_w2)\n')
     f.write('load = time.time() - start\n\n\n')
 
     f.write('import socket\n\n')
@@ -261,34 +265,6 @@ def write_recv():
     f.write('\t\tdata.extend(packet)\n')
     f.write('\treturn data\n\n')
 
-def write_pre_cal_weight():
-    f.write('import math\n')
-    f.write('def pre_cal_weight(idx, device_num, input_size, originw):\n')
-    f.write('\tsize = originw.shape[0]\n')
-    f.write('\tsize2 = originw.shape[1]\n')
-    f.write('\tinput_size = int(input_size)\n')
-    f.write('\tavg = int(math.floor(input_size/device_num))\n')
-    f.write('\ttotal = avg\n')
-    f.write('\tmod = input_size % device_num\n')
-    f.write('\tstart = 0\n')
-    f.write('\tfor ii in range(idx):\n')
-    f.write('\t\tif ii < mod:\n')
-    f.write('\t\t\tstart += avg+1\n')
-    f.write('\t\telse:\n')
-    f.write('\t\t\tstart += avg\n')
-    f.write('\tif idx < mod:\n')
-    f.write('\t\ttotal += 1\n')
-    f.write('\theight = total\n')
-    f.write('\tstride = input_size * input_size\n')
-    f.write('\theight1 = int(size * height / input_size)\n')
-    f.write('\tw = np.float32(np.zeros(shape=(height1, size2)))\n')
-    f.write('\tcnt = 0\n')
-    f.write('\tfor i in range(start*input_size, size, stride):\n')
-    f.write('\t\tpos = cnt * height*input_size\n')
-    f.write('\t\tw[pos:pos+height*input_size, :] = originw[i:i+height*input_size, :]\n')
-    f.write('\t\tcnt += 1\n')
-    f.write('\treturn w\n')
-    f.write('\n')
 
 def fastmode_calculation():
     mask_list = [] # record whether data need to be send
@@ -362,11 +338,11 @@ for model in range(4):
             f.write('class Net(nn.Module):\n')
             write_init()
             write_set_pre_cal_w()
+            write_set_pre_cal_w2()
             write_forward()
             write_sendall()
             write_recvall()
             write_recv()
-            write_pre_cal_weight()
             ##################### main ######################
             write_main()
             write_dump()

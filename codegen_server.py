@@ -29,10 +29,15 @@ def write_header():
     f.write('pcnn_path = dirname(dirname(dirname(abspath(__file__))))\n\n')
     f.write('image_path = sys.argv[4]\n')
     f.write('image = Image.open(image_path)\n')
-    f.write('image = image.resize((224, 224), Image.ANTIALIAS)\n')
-    f.write('# convert image to numpy array\n')
-    f.write('x = np.array([np.asarray(image)[:, :, :3]])\n')
-    f.write('x = torch.Tensor(list(x)).permute(0, 3, 2, 1)\n\n\n')
+    f.write('\nfrom torchvision import transforms\n')
+    f.write('preprocess = transforms.Compose([\n')
+    f.write('\ttransforms.Resize(256),\n')
+    f.write('\ttransforms.CenterCrop(224),\n')
+    f.write('\ttransforms.ToTensor(),\n')
+    f.write('\ttransforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),\n')
+    f.write('])\n')
+    f.write('input_tensor = preprocess(image)\n')
+    f.write('x = input_tensor.unsqueeze(0) # create a mini-batch as expected by the model\n\n\n')
     f.write('y = None\n')
     f.write('cnt = 0\n\n')
 
@@ -186,11 +191,11 @@ def write_job():
                 f.write('\t\t\t\t\t\tx[:, :, %d:%d, :] = data_from_device\n' 
                         %(data['padding_info'][device_idx][layer_key[block_idx-1]][number_of_layer_in_block-1][0], data['padding_info'][device_idx][layer_key[block_idx-1]][number_of_layer_in_block-1][1]+1))
         elif data['layers'][end] == 'FL':
-            f.write('\t\t\t\t\t\tx = np.zeros(%d)\n' % (data['out_channel'][end]))
+            f.write('\t\t\t\t\t\tx = torch.zeros(%d)\n' % (data['out_channel'][end]))
             f.write('\t\t\t\t\tx += data_from_device\n')
             if end != len(fc_idx)-1:
                 f.write('\t\t\t\t\tif cnt == %d:\n' % (total_device_num))
-                f.write('\t\t\t\t\t\tx = relu(x + net.fc%d.bias.detach().numpy())\n' % (fc_idx[end]))
+                f.write('\t\t\t\t\t\tx = F.relu(x + net.fc%d.bias)\n' % (fc_idx[end]))
  
     f.write('\t\t\tif cnt < device_num:\n')    
     f.write('\t\t\t\tcondition.wait()\n')  
@@ -244,7 +249,7 @@ def write_job():
             if data['layers'][end] == 'conv' or data['layers'][end] == 'pool':
                 f.write('\t\t\t\ty = x\n')
             elif data['layers'][end] == 'FL':
-                f.write('\t\t\t\ty = x + net.fc%d.bias.detach().numpy()\n' % fc_idx[end])
+                f.write('\t\t\t\ty = x + net.fc%d.bias\n' % fc_idx[end])
             f.write('\t\t\t\tbreak\n')
     f.write('\t\t\t# print(\'to\', idx, y.shape)\n')
     f.write('\t\t\tsendall(conn, pickle.dumps({\n')
@@ -285,8 +290,7 @@ def write_socket():
     f.write('\t\t\tt.join()\n')
     f.write('\t\t# print(y[:50])\n')
     f.write('\t\t# print(y.view(-1).detach().numpy()[:50])\n')
-    f.write('\t\ty = softmax(y)\n')
-    f.write('\t\tindex = np.argmax(y)\n')
+    f.write('\t\tindex = np.argmax(torch.nn.functional.softmax(y, dim=0).detach().numpy())\n')
     f.write('\t\t# print(index)\n')
     f.write('\texcept error:\n')
     f.write('\t\ts.close()\n')
