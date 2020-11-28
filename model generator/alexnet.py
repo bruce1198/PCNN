@@ -107,7 +107,7 @@ if __name__ == "__main__":
         cnt += 1
     net.set_pre_cal_w(w)
     load_time = time.time() - start_time
-    print(load_time)
+    # print(load_time)
 
     if len(sys.argv) == 2:
         if sys.argv[1] == '-g':
