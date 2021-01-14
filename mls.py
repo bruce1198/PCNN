@@ -54,6 +54,8 @@ class Prefetcher:
                 min = self.total_time[i]
                 idx = i
         return idx
+    def prefetchAll(self):
+        pass
 
     def prefetch(self):
         idx = self.get_fastest_slicing_blocks()
