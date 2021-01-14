@@ -39,15 +39,15 @@ def write_init():
 
 def write_set_pre_cal_w():
     f.write('\tdef set_pre_cal_w(self, w):\n')
-    f.write('\t\tself.fc1 = nn.Linear(w.shape[1], w.shape[0])\n')
+    f.write('\t\tself.fc1 = nn.Linear(w.shape[1], w.shape[0], bias=False)\n')
     f.write('\t\tself.fc1.weight = nn.Parameter(w)\n')
     f.write('\n')
 
 def write_set_pre_cal_w2():
     f.write('\tdef set_pre_cal_w2(self, w):\n')
-    f.write('\t\tself.fc2 = nn.Linear(w[\'w1\'].shape[1], w[\'w1\'].shape[0])\n')
+    f.write('\t\tself.fc2 = nn.Linear(w[\'w1\'].shape[1], w[\'w1\'].shape[0], bias=False)\n')
     f.write('\t\tself.fc2.weight = nn.Parameter(w[\'w1\'])\n')
-    f.write('\t\tself.fc3 = nn.Linear(w[\'w2\'].shape[1], w[\'w2\'].shape[0])\n')
+    f.write('\t\tself.fc3 = nn.Linear(w[\'w2\'].shape[1], w[\'w2\'].shape[0], bias=False)\n')
     f.write('\t\tself.fc3.weight = nn.Parameter(w[\'w2\'])\n')
     f.write('\n')
 

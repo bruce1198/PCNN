@@ -48,6 +48,9 @@ class Net(nn.Module):
 		self.fc3 = nn.Linear(4096, 1000)
 
 	def forward_origin(self, x):
+		self.fc1.bias = nn.Parameter(torch.zeros(4096))
+		self.fc2.bias = nn.Parameter(torch.zeros(4096))
+		self.fc3.bias = nn.Parameter(torch.zeros(1000))
 		x = F.relu(self.conv1(x))
 		x = F.relu(self.conv2(x))
 		x = self.pool1(x)
@@ -82,28 +85,28 @@ class Net(nn.Module):
 		x = F.relu(self.conv6(x))
 		x = F.relu(self.conv7(x))
 		x = self.pool3(x)
-		x = F.relu(self.conv8(x))
-		x = F.relu(self.conv9(x))
-		x = F.relu(self.conv10(x))
-		x = self.pool4(x)
-		x = F.relu(self.conv11(x))
-		x = F.relu(self.conv12(x))
-		x = F.relu(self.conv13(x))
-		x = self.pool5(x)
-		x = x.view(-1).detach().numpy()
-		w = self.fc1.weight.data.numpy().transpose()
-		fblk = FCBlock('normal', 0, 1)
-		fblk.set_input_size(7.0)
-		fblk.append_layer(w)
-		x = relu(fblk.process(x) + self.fc1.bias.detach().numpy())
-		w1 = self.fc2.weight.data.numpy().transpose()
-		w2 = self.fc3.weight.data.numpy().transpose()
-		fblk = FCBlock('hybrid', 0, 1)
-		fblk.set_bias(self.fc2.bias.detach().numpy())
-		fblk.append_layer(w1)
-		fblk.append_layer(w2)
-		x = fblk.process(x)
-		x += self.fc3.bias.detach().numpy()
+		# x = F.relu(self.conv8(x))
+		# x = F.relu(self.conv9(x))
+		# x = F.relu(self.conv10(x))
+		# x = self.pool4(x)
+		# x = F.relu(self.conv11(x))
+		# x = F.relu(self.conv12(x))
+		# x = F.relu(self.conv13(x))
+		# x = self.pool5(x)
+		# x = x.view(-1).detach().numpy()
+		# w = self.fc1.weight.data.numpy().transpose()
+		# fblk = FCBlock('normal', 0, 1)
+		# fblk.set_input_size(7.0)
+		# fblk.append_layer(w)
+		# x = relu(fblk.process(x) + self.fc1.bias.detach().numpy())
+		# w1 = self.fc2.weight.data.numpy().transpose()
+		# w2 = self.fc3.weight.data.numpy().transpose()
+		# fblk = FCBlock('hybrid', 0, 1)
+		# fblk.set_bias(self.fc2.bias.detach().numpy())
+		# fblk.append_layer(w1)
+		# fblk.append_layer(w2)
+		# x = fblk.process(x)
+		# x += self.fc3.bias.detach().numpy()
 		return x
 
 start_time = time.time()
@@ -118,15 +121,21 @@ if len(sys.argv) == 2:
 	else:
 		image_path = sys.argv[1]
 		image = Image.open(image_path)
-		image = image.resize((224, 224), Image.ANTIALIAS )
-		# convert image to numpy array
-		x = np.array([np.asarray(image)[:, :, :3]])
-		x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
+		from torchvision import transforms
+		preprocess = transforms.Compose([
+			transforms.Resize(256),
+			transforms.CenterCrop(224),
+			transforms.ToTensor(),
+			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+		])
+		input_tensor = preprocess(image)
+		x = input_tensor.unsqueeze(0)
 
 start_time = time.time()
-# y = net.forward_origin(x)
-# print(y.view(-1).detach().numpy()[:50])
+y = net.forward_origin(x)
+print(y.view(-1).detach().numpy()[:50])
 y = net(x)
+# print(y.view(-1).detach().numpy()[:50])
 # print(y[:50])
 # print(y[-50:])
 y = softmax(y)

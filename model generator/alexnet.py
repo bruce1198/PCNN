@@ -42,6 +42,9 @@ class Net(nn.Module):
         print(self.w.shape)
 
     def forward(self, x):
+        self.fc1.bias = nn.Parameter(torch.zeros(4096))
+        self.fc2.bias = nn.Parameter(torch.zeros(4096))
+        self.fc3.bias = nn.Parameter(torch.zeros(1000))
         x = self.pool1(F.relu(self.conv1(x)))
         x = self.pool2(F.relu(self.conv2(x)))
         x = F.relu(self.conv3(x))
@@ -85,11 +88,11 @@ if __name__ == "__main__":
 
     start_time = time.time()
     # y = net.forward_origin(x)
-    # print(y.view(-1).detach().numpy()[:50])
     # y = net.forward_origin(x).view(-1).detach().numpy()
     # print(y[:50])
     y = net(x)
     # print(y.shape)
+    print(y.view(-1).detach().numpy()[:50])
     # print(y[:50])
     index = np.argmax(torch.nn.functional.softmax(y, dim=1).detach().numpy())
     # index = 0

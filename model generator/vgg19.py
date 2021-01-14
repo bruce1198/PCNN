@@ -51,6 +51,9 @@ class Net(nn.Module):
 		self.fc3 = nn.Linear(4096, 1000)
 
 	def forward_origin(self, x):
+		self.fc1.bias = nn.Parameter(torch.zeros(4096))
+		self.fc2.bias = nn.Parameter(torch.zeros(4096))
+		self.fc3.bias = nn.Parameter(torch.zeros(1000))
 		x = F.relu(self.conv1(x))
 		x = F.relu(self.conv2(x))
 		x = self.pool1(x)
@@ -128,14 +131,19 @@ if len(sys.argv) == 2:
 	else:
 		image_path = sys.argv[1]
 		image = Image.open(image_path)
-		image = image.resize((224, 224), Image.ANTIALIAS )
-		# convert image to numpy array
-		x = np.array([np.asarray(image)[:, :, :3]])
-		x = torch.Tensor(list(x)).permute(0, 3, 2, 1)
+		from torchvision import transforms
+		preprocess = transforms.Compose([
+			transforms.Resize(256),
+			transforms.CenterCrop(224),
+			transforms.ToTensor(),
+			transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+		])
+		input_tensor = preprocess(image)
+		x = input_tensor.unsqueeze(0)
 
 start_time = time.time()
-# y = net.forward_origin(x)
-# print(y.view(-1).detach().numpy()[:50])
+y = net.forward_origin(x)
+print(y.view(-1).detach().numpy()[:50])
 # print(y.view(-1).detach().numpy()[-50:])
 y = net(x)
 # print(y.shape)
