@@ -91,7 +91,11 @@ if __name__ == "__main__":
     y = net(x)
     # print(y.shape)
     # print(y[:50])
-    index = np.argmax(torch.nn.functional.softmax(y, dim=0).detach().numpy())
+    print(y.view(-1).detach().numpy()[:50])
+    # index = np.argmax(y.view(-1).detach().numpy())
+    softmax_f = torch.nn.Softmax(dim=1)
+    print(y.shape)
+    index = np.argmax(softmax_f(y).detach().numpy())
     # index = 0
 
     cal_time = time.time() - start_time
